@@ -13,7 +13,7 @@ id,scheduled_date,brand,product_name,key_points,image_path,affiliate_link,status
 #
 # Example (delete once you add real rows):
 # 001,2026-09-22,RW Carbon,Carbon Fiber Rear Diffuser,Direct bolt-on fitment;Dry carbon weave,rwcarbon-diffuser-01.jpg,https://example.com/aff/rwcarbon-diffuser,pending,,
-001,2026-09-22,RW Carbon,BMW F91/F92/F93 M8 DTM Carbon Fiber Rear Diffuser,Genuine carbon fiber with clear coat finish;100% bolt-on using factory diffuser mounting points;Fits all 2019+ M8 (coupe / gran coupe / convertible),TODO-add-image.jpg,TODO-add-your-affiliate-link,pending,,
+001,2026-09-22,RW Carbon,BMW F91/F92/F93 M8 DTM Carbon Fiber Rear Diffuser,Genuine carbon fiber with clear coat finish;100% bolt-on using factory diffuser mounting points;Fits all 2019+ M8 (coupe / gran coupe / convertible),TODO-add-image.jpg,https://bit.ly/4nKn44t,pending,,
 002,2026-09-23,ECS Tuning,Billet Aluminum Expansion Tank Cap (ES#3477334 / J018),CNC-machined from solid 6061-T6 billet aluminum with Type II anodized finish;Direct replacement for the factory plastic cap;Fits VW MK7 Golf/GTI/R (2015+),TODO-add-image.jpg,TODO-add-your-affiliate-link,pending,,
 003,2026-09-24,Bimmer Plug,VR Style Carbon Fiber Front Lip,Genuine 2x2 weave carbon fiber with gloss UV-protectant clear coat;Fits BMW G80 M3 & G82/G83 M4;Professional installation recommended,TODO-add-image.jpg,TODO-add-your-affiliate-link,pending,,
 004,2026-09-25,ARM Motorsports,7" Intercooler FMIC (N54/N55),805 cubic inch bar-and-plate core (20x7x5.75in) with 18 fins per inch;Fits E90/E92 335i and E82 135i (N54/N55),TODO-add-image.jpg,TODO-add-your-affiliate-link,pending,,
