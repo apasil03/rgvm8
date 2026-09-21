@@ -66,8 +66,11 @@ Same Settings page, "Variables" tab → New repository variable:
 ## 6. Enable GitHub Pages
 
 Repo → Settings → Pages → Build and deployment → Source: **GitHub
-Actions**. That's it — the `publish-pages.yml` workflow handles the rest
-whenever you push a new image into `assets/`.
+Actions**. That's a one-time click — after that, `daily-post.yml` deploys
+Pages itself as part of each daily run (before it calls the Graph API,
+so the image is guaranteed live first). If you want to preview an image
+you just added without waiting for the next scheduled run, trigger
+`publish-pages.yml` manually from the Actions tab.
 
 Note: this makes the contents of this repo reachable at the Pages URL
 (not indexed/searchable, but not secret either). Don't put anything in

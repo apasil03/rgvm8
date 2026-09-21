@@ -7,10 +7,14 @@ replies to comments on our own posts.
 
 ## What this does
 
-- **Daily posting** (`scripts/post_daily.py`, run by `.github/workflows/daily-post.yml`):
-  pulls the next pending row from `content/queue.csv`, builds a caption in
-  the brand voice (`content/brand_voice.md`), publishes it via the
-  Instagram Graph API, and marks the row posted.
+- **Daily posting** (`scripts/prepare_post.py` + `scripts/publish_post.py`,
+  run by `.github/workflows/daily-post.yml`): picks the next pending row
+  from `content/queue.csv`, generates a branded graphic card locally if no
+  real photo was supplied (`scripts/generate_card.py` — no internet
+  needed), deploys it to GitHub Pages, then builds a caption in the brand
+  voice (`content/brand_voice.md`), publishes it via the Instagram Graph
+  API, and marks the row posted. Real photos in `assets/pending/` always
+  take priority over the generated card.
 - **Comment replies** (`scripts/reply_comments.py`, run by
   `.github/workflows/reply-comments.yml`): scans comments on our recent
   posts and auto-replies to safe categories (thanks/compliments,

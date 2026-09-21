@@ -1,10 +1,12 @@
-name: Publish assets to GitHub Pages
+name: Publish assets to GitHub Pages (manual)
 
+# Manual-only. daily-post.yml deploys Pages itself inline (in the same
+# job, before calling the Graph API) so it can guarantee the image it's
+# about to publish is actually live first. Also triggering a deploy here
+# on every push would share the same "pages" concurrency group and could
+# cancel that in-flight deploy out from under it. Run this by hand if you
+# just want to preview assets/ without waiting for the next daily post.
 on:
-  push:
-    branches: [main]
-    paths:
-      - "assets/**"
   workflow_dispatch: {}
 
 permissions:
