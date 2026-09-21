@@ -42,7 +42,7 @@ def _wrap_to_width(draw: ImageDraw.ImageDraw, text: str, font: ImageFont.FreeTyp
     return lines
 
 
-def generate_card(brand: str, product_name: str, key_points: str, output_path: str) -> None:
+def generate_card(brand: str, product_name: str, key_points: str, output_path: str, post_type: str = "affiliate") -> None:
     img = Image.new("RGB", (WIDTH, HEIGHT), BG)
     draw = ImageDraw.Draw(img)
 
@@ -81,8 +81,9 @@ def generate_card(brand: str, product_name: str, key_points: str, output_path: s
     # footer: handle + CTA
     footer_font = _font(BOLD, 44)
     cta_font = _font(REGULAR, 34)
+    footer_cta = "Follow for more" if post_type == "engagement" else "Link in bio  //  #ad"
     draw.text((margin, HEIGHT - 160), "@RGVM8", font=footer_font, fill=FG)
-    draw.text((margin, HEIGHT - 100), "Link in bio  //  #ad", font=cta_font, fill=MUTED)
+    draw.text((margin, HEIGHT - 100), footer_cta, font=cta_font, fill=MUTED)
 
     Path(output_path).parent.mkdir(parents=True, exist_ok=True)
     img.save(output_path, quality=92)

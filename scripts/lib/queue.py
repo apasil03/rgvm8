@@ -7,7 +7,7 @@ QUEUE_PATH = ROOT / "content" / "queue.csv"
 PENDING_DIR = ROOT / "assets" / "pending"
 
 FIELDNAMES = [
-    "id", "scheduled_date", "brand", "product_name", "key_points",
+    "id", "scheduled_date", "post_type", "brand", "product_name", "key_points",
     "image_path", "affiliate_link", "status", "posted_at", "ig_media_id",
 ]
 
@@ -15,11 +15,15 @@ HEADER_COMMENT = """\
 # Columns:
 #   id             - unique row id, e.g. 001
 #   scheduled_date - YYYY-MM-DD, earliest date this may post (posts in date then id order)
-#   brand          - one of: RW Carbon, ECS Tuning, RCW Performance, Bimmer Plug, ARM Motorsports, AutoTecknic
-#   product_name   - real product name, exactly as the brand lists it
-#   key_points     - 1-2 short factual selling points, semicolon-separated. No invented specs.
+#   post_type      - "affiliate" (needs a real affiliate_link, gets #ad) or
+#                     "engagement" (general car content, no link needed, no #ad —
+#                     it would be false to disclose an ad on unpaid content)
+#   brand          - affiliate: RW Carbon, ECS Tuning, RCW Performance, Bimmer Plug,
+#                     ARM Motorsports, AutoTecknic. engagement: any real marque (BMW, Ferrari, McLaren, ...)
+#   product_name   - real product/model name
+#   key_points     - 1-2 short factual points, semicolon-separated. No invented specs.
 #   image_path     - filename in assets/pending/, or a TODO placeholder to have a card auto-generated
-#   affiliate_link - the real commission link for this product (UTM params are added automatically)
+#   affiliate_link - required (non-TODO) for post_type=affiliate; leave blank for engagement
 #   status         - pending | posted  (leave as pending when adding a row; the bot flips it)
 #   posted_at      - left blank, filled in automatically
 #   ig_media_id    - left blank, filled in automatically

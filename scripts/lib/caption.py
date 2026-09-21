@@ -25,19 +25,26 @@ def pick_hashtags(brand: str, general_count: int = 4, brand_count: int = 2) -> l
     return general + brand_sample
 
 
-def build_caption(brand: str, product_name: str, key_points: str, affiliate_link: str) -> str:
+def build_caption(brand: str, product_name: str, key_points: str, affiliate_link: str = "", post_type: str = "affiliate") -> str:
     points = [p.strip() for p in key_points.split(";") if p.strip()]
     points_line = " ".join(f"{p}." if not p.endswith((".", "!")) else p for p in points)
     hashtags = pick_hashtags(brand)
 
-    hook = f"New from {brand}: {product_name}. 🔧"
-    body = points_line
-    cta = "Link in bio 🔗"
+    if post_type == "engagement":
+        # General car-culture content: no product, no affiliate link, so no
+        # #ad disclosure (it would be false — nothing here is sponsored).
+        hook = f"{brand} spotlight: {product_name}. 🏁"
+        cta = "Follow @rgvm8 for more 🔧"
+        disclosure = ""
+    else:
+        hook = f"New from {brand}: {product_name}. 🔧"
+        cta = "Link in bio 🔗"
+        disclosure = "#ad\n"
 
     return (
         f"{hook}\n\n"
-        f"{body}\n\n"
+        f"{points_line}\n\n"
         f"{cta}\n\n"
-        f"#ad\n"
+        f"{disclosure}"
         f"{' '.join(hashtags)}"
     )

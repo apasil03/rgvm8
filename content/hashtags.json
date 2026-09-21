@@ -9,7 +9,10 @@
     "RCW Performance": ["#rcwperformance", "#performanceparts"],
     "Bimmer Plug": ["#bimmerplug", "#bmwmods", "#bimmer"],
     "ARM Motorsports": ["#armmotorsports", "#armotorsports", "#motorsportbuild"],
-    "AutoTecknic": ["#autotecknic", "#drycarbon", "#eurotuning"]
+    "AutoTecknic": ["#autotecknic", "#drycarbon", "#eurotuning"],
+    "BMW": ["#bmw", "#bmwm", "#bmwmotorsport"],
+    "Ferrari": ["#ferrari", "#ferrariclub", "#supercar"],
+    "McLaren": ["#mclaren", "#mclarenautomotive", "#hypercar"]
   },
   "notes": "Rotate 3-5 general + 2-3 brand tags per post. Avoid any tag flagged as banned/shadowbanned on Instagram — check periodically, they change."
 }

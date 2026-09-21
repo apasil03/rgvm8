@@ -30,12 +30,15 @@ def main() -> int:
         print(f"Row {row_id} not found in queue.csv (did something change it between steps?)")
         return 1
 
+    post_type = row.get("post_type", "affiliate")
+    link = caption_lib.add_utm(row["affiliate_link"], campaign="daily_post") if row["affiliate_link"] else ""
     image_url = f"{pages_base_url}/assets/pending/{row['image_path']}"
     text = caption_lib.build_caption(
         brand=row["brand"],
         product_name=row["product_name"],
         key_points=row["key_points"],
-        affiliate_link=caption_lib.add_utm(row["affiliate_link"], campaign="daily_post"),
+        affiliate_link=link,
+        post_type=post_type,
     )
 
     print(f"Posting row {row['id']} ({row['brand']} - {row['product_name']}) using {image_url}")

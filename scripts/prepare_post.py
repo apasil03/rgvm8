@@ -27,6 +27,7 @@ def resolve_image_filename(row: dict) -> str:
         product_name=row["product_name"],
         key_points=row["key_points"],
         output_path=str(queue.PENDING_DIR / generated_name),
+        post_type=row.get("post_type", "affiliate"),
     )
     print(f"No photo found for row {row['id']} ({row['image_path']}); generated {generated_name} instead.")
     return generated_name
@@ -46,10 +47,17 @@ def main() -> int:
     today = dt.date.today().isoformat()
     due = queue.due_rows(rows, today)
 
-    blocked = [r for r in due if r["affiliate_link"].startswith("TODO")]
+    def is_blocked(r: dict) -> bool:
+        # engagement rows carry no affiliate link by design; only affiliate
+        # rows need a real, confirmed link before they can go out.
+        return r.get("post_type", "affiliate") == "affiliate" and (
+            not r["affiliate_link"] or r["affiliate_link"].startswith("TODO")
+        )
+
+    blocked = [r for r in due if is_blocked(r)]
     for r in blocked:
         print(f"Skipping row {r['id']} ({r['brand']}): affiliate_link is still a TODO placeholder.")
-    postable = [r for r in due if not r["affiliate_link"].startswith("TODO")]
+    postable = [r for r in due if not is_blocked(r)]
 
     if not postable:
         print("No postable rows due today.")
