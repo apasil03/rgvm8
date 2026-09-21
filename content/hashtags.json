@@ -1,0 +1,15 @@
+{
+  "general": [
+    "#carsofinstagram", "#jdm", "#tunerlife", "#carmods", "#builtnotbought",
+    "#carporn", "#stance", "#boosted", "#trackcar", "#carpartsdaily"
+  ],
+  "brand": {
+    "RW Carbon": ["#rwcarbon", "#carbonfiber", "#euroaero"],
+    "ECS Tuning": ["#ecstuning", "#vwaudi", "#germanengineering"],
+    "RCM Performance": ["#rcmperformance", "#rcm", "#performanceparts"],
+    "Bimmer Plug": ["#bimmerplug", "#bmwmods", "#bimmer"],
+    "ARM Motorsports": ["#armmotorsports", "#armotorsports", "#motorsportbuild"],
+    "AutoTekniq": ["#autotekniq", "#tekniq", "#eurotuning"]
+  },
+  "notes": "Rotate 3-5 general + 2-3 brand tags per post. Avoid any tag flagged as banned/shadowbanned on Instagram — check periodically, they change."
+}

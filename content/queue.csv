@@ -1,0 +1,15 @@
+id,scheduled_date,brand,product_name,key_points,image_path,affiliate_link,status,posted_at,ig_media_id
+# Columns:
+#   id             - unique row id, e.g. 001
+#   scheduled_date - YYYY-MM-DD, earliest date this may post (posts in date then id order)
+#   brand          - one of: RW Carbon, ECS Tuning, RCM Performance, Bimmer Plug, ARM Motorsports, AutoTekniq
+#   product_name   - real product name, exactly as the brand lists it
+#   key_points     - 1-2 short factual selling points, semicolon-separated. No invented specs.
+#   image_path     - filename only, must exist in assets/pending/ (e.g. rwcarbon-diffuser-01.jpg)
+#   affiliate_link - the real commission link for this product (UTM params are added automatically)
+#   status         - pending | posted  (leave as pending when adding a row; the bot flips it)
+#   posted_at      - left blank, filled in automatically
+#   ig_media_id    - left blank, filled in automatically
+#
+# Example (delete once you add real rows):
+# 001,2026-09-22,RW Carbon,Carbon Fiber Rear Diffuser,Direct bolt-on fitment;Dry carbon weave,rwcarbon-diffuser-01.jpg,https://example.com/aff/rwcarbon-diffuser,pending,,

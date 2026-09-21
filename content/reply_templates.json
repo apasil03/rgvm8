@@ -1,0 +1,14 @@
+{
+  "compliment": [
+    "Appreciate that! 🙏 more builds like this coming",
+    "Glad you're into it! 🔧 more where that came from",
+    "Thanks! stay tuned for more 🚗"
+  ],
+  "where_to_buy": [
+    "Linked in our bio! 🔗",
+    "It's up on our bio link 👆",
+    "Grab it from the link in our bio!"
+  ],
+  "_comment": "Categories below are intentionally NOT auto-replied — logged to needs_review.json instead so a human answers. Never guess fitment/compatibility.",
+  "no_auto_reply_categories": ["fitment", "spam", "unclear"]
+}
