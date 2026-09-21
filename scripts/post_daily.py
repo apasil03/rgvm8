@@ -32,7 +32,15 @@ def read_queue() -> list:
                 continue
             rows.append(line)
     reader = csv.DictReader(rows)
-    return list(reader)
+    parsed = list(reader)
+    for row in parsed:
+        if None in row or any(v is None for v in row.values()):
+            raise ValueError(
+                f"content/queue.csv row {row.get('id')} has the wrong number of "
+                "columns — check for an unquoted comma inside a field (e.g. in "
+                "key_points) shifting the rest of the row."
+            )
+    return parsed
 
 
 def write_queue(rows: list) -> None:

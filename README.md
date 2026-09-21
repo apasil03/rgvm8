@@ -2,7 +2,7 @@
 
 Automation for the @rgvm8 Instagram account: daily posting of car parts
 content (RW Carbon, ECS Tuning, RCW Performance, Bimmer Plug, ARM
-Motorsports, AutoTekniq) with tracked commission links, plus automatic
+Motorsports, AutoTecknic) with tracked commission links, plus automatic
 replies to comments on our own posts.
 
 ## What this does
