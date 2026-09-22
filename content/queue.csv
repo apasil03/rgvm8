@@ -8,7 +8,8 @@
 #                     ARM Motorsports, AutoTecknic. engagement: any real marque (BMW, Ferrari, McLaren, ...)
 #   product_name   - real product/model name
 #   key_points     - 1-2 short factual points, semicolon-separated. No invented specs.
-#   image_path     - filename in assets/pending/, or a TODO placeholder to have a card auto-generated
+#   image_path     - real photo/video filename in assets/pending/, or a TODO
+#                     placeholder to have a Reel auto-generated (real media always wins)
 #   affiliate_link - required (non-TODO) for post_type=affiliate; leave blank for engagement
 #   status         - pending | posted  (leave as pending when adding a row; the bot flips it)
 #   posted_at      - left blank, filled in automatically

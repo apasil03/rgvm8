@@ -32,7 +32,8 @@ def main() -> int:
 
     post_type = row.get("post_type", "affiliate")
     link = caption_lib.add_utm(row["affiliate_link"], campaign="daily_post") if row["affiliate_link"] else ""
-    image_url = f"{pages_base_url}/assets/pending/{row['image_path']}"
+    media_url = f"{pages_base_url}/assets/pending/{row['image_path']}"
+    is_video = row["image_path"].lower().endswith((".mp4", ".mov"))
     text = caption_lib.build_caption(
         brand=row["brand"],
         product_name=row["product_name"],
@@ -41,9 +42,13 @@ def main() -> int:
         post_type=post_type,
     )
 
-    print(f"Posting row {row['id']} ({row['brand']} - {row['product_name']}) using {image_url}")
-    container_id = graph_api.create_media_container(ig_user_id, image_url, text, token)
-    graph_api.wait_until_container_ready(container_id, token)
+    print(f"Posting row {row['id']} ({row['brand']} - {row['product_name']}) using {media_url} ({'reel' if is_video else 'image'})")
+    if is_video:
+        container_id = graph_api.create_reels_container(ig_user_id, media_url, text, token)
+        graph_api.wait_until_container_ready(container_id, token, timeout_s=300)
+    else:
+        container_id = graph_api.create_media_container(ig_user_id, media_url, text, token)
+        graph_api.wait_until_container_ready(container_id, token)
     media_id = graph_api.publish_media(ig_user_id, container_id, token)
     print(f"Published as media {media_id}")
 

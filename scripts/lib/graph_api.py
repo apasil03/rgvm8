@@ -31,6 +31,21 @@ def create_media_container(ig_user_id: str, image_url: str, caption: str, token:
     return _check(resp)["id"]
 
 
+def create_reels_container(ig_user_id: str, video_url: str, caption: str, token: str) -> str:
+    resp = requests.post(
+        f"{BASE_URL}/{ig_user_id}/media",
+        data={
+            "media_type": "REELS",
+            "video_url": video_url,
+            "caption": caption,
+            "share_to_feed": "true",
+            "access_token": token,
+        },
+        timeout=30,
+    )
+    return _check(resp)["id"]
+
+
 def wait_until_container_ready(container_id: str, token: str, timeout_s: int = 120) -> None:
     deadline = time.time() + timeout_s
     while time.time() < deadline:

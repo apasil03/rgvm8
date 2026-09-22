@@ -13,23 +13,26 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from lib import queue  # noqa: E402
-from generate_card import generate_card  # noqa: E402
+from generate_reel import generate_reel  # noqa: E402
 
 
-def resolve_image_filename(row: dict) -> str:
+def resolve_media_filename(row: dict) -> str:
+    """Real media (photo or video) you've added always wins. Otherwise
+    generate a Reel — it gets far more reach than a static card, and we
+    can produce it locally just as easily."""
     candidate = queue.PENDING_DIR / row["image_path"]
     if candidate.is_file():
         return row["image_path"]
 
-    generated_name = f"{row['id']}-card.jpg"
-    generate_card(
+    generated_name = f"{row['id']}-reel.mp4"
+    generate_reel(
         brand=row["brand"],
         product_name=row["product_name"],
         key_points=row["key_points"],
         output_path=str(queue.PENDING_DIR / generated_name),
         post_type=row.get("post_type", "affiliate"),
     )
-    print(f"No photo found for row {row['id']} ({row['image_path']}); generated {generated_name} instead.")
+    print(f"No real media found for row {row['id']} ({row['image_path']}); generated {generated_name} instead.")
     return generated_name
 
 
@@ -65,10 +68,10 @@ def main() -> int:
         return 0
 
     row = postable[0]
-    row["image_path"] = resolve_image_filename(row)
+    row["image_path"] = resolve_media_filename(row)
     queue.write_queue(rows)
 
-    print(f"Prepared row {row['id']} ({row['brand']} - {row['product_name']}) with image {row['image_path']}")
+    print(f"Prepared row {row['id']} ({row['brand']} - {row['product_name']}) with media {row['image_path']}")
     set_output("row_id", row["id"])
     return 0
 
