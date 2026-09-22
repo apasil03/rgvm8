@@ -18,21 +18,53 @@ never makes technical claims we can't back up.
   / linked below depending on placement) — never a bare link dump with no
   reason to click.
 - Every post that includes a commission/affiliate link discloses it.
-  Default disclosure tag: `#ad` in the first line of visible caption text
-  (not buried at the bottom), per FTC guidance on affiliate content.
+  `#ad` goes at the very start of the caption, not before the hashtag
+  block — Instagram truncates captions at ~125 characters behind "...more",
+  and FTC guidance requires the disclosure to be visible without a tap.
+- Every caption includes one save/share/tag prompt ("save this for your
+  build list", "tag someone who needs this") — saves and shares outrank
+  likes in Instagram's ranking, so this isn't just filler, it's the actual
+  lever. See "What we're modeling" below.
 
 ## Caption skeleton
 
 ```
-[Hook line about the part/brand — 1 sentence, specific, not generic]
+[#ad if affiliate] [Hook line — 1 sentence, specific, not generic]
 
 [1-2 sentences from key_points — what it does / why it's worth it]
 
-[CTA] — link in bio 🔗
+[Save/share/tag prompt]
+[CTA] — link in bio 🔗 (affiliate) or follow for more (engagement)
 
-#ad
+[occasional UGC callout — see below]
+
 [hashtag block]
 ```
+
+## What we're modeling
+
+The goal is to grow like the car pages with hundreds of thousands to
+millions of followers. Being honest about the actual mechanics there,
+since not all of it transfers to an automated pipeline:
+
+- **Video/Reels are the primary growth lever on those pages, not static
+  posts.** This pipeline currently only produces static images. Real
+  clips (installs, exhaust notes, launches) would outperform anything
+  here — worth adding as a second content stream when there's real
+  footage to work with.
+- **Most of those pages aren't shooting original content — they're
+  reposting community submissions with credit.** That's the actual UGC
+  engine behind scaling past personal photography. Captions include an
+  occasional "tag @rgvm8 to get featured" callout for exactly this
+  reason — if it works, real submissions start coming in that are more
+  compelling than a generated card, at zero sourcing cost. Whoever
+  reviews the account's DMs/tags should feed the strongest submissions
+  into `assets/pending/` to replace a scheduled card.
+- **Save/share-bait works because it's honest, not because it's a
+  trick** — asking "would you daily this" or "tag someone" is a real
+  invitation to engage, not manipulation. Keep it specific to the
+  content, not generic ("comment 🔥 for more" on every single post reads
+  as spam fast).
 
 ## Reply voice (comments)
 

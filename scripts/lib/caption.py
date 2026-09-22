@@ -25,6 +25,23 @@ def pick_hashtags(brand: str, general_count: int = 4, brand_count: int = 2) -> l
     return general + brand_sample
 
 
+# Save/share/tag prompts are what actually move these posts in the algorithm
+# (saves and shares outrank likes) — this is how big car pages caption things,
+# not just generic hype.
+AFFILIATE_ENGAGEMENT_LINES = [
+    "Save this for your build list 📌",
+    "Tag someone who needs this in their garage 👇",
+    "Rate this mod 1-10 👇",
+]
+ENGAGEMENT_ENGAGEMENT_LINES = [
+    "Would you daily this? 👇",
+    "Tag someone who'd love this 👇",
+    "Drop a 🔥 if this belongs in your dream garage",
+]
+UGC_CALLOUT = "Got a build like this? Tag @rgvm8 to get featured 📸"
+UGC_CALLOUT_CHANCE = 0.25  # occasional, not every post — keeps it from feeling like spam
+
+
 def build_caption(brand: str, product_name: str, key_points: str, affiliate_link: str = "", post_type: str = "affiliate") -> str:
     points = [p.strip() for p in key_points.split(";") if p.strip()]
     points_line = " ".join(f"{p}." if not p.endswith((".", "!")) else p for p in points)
@@ -35,16 +52,22 @@ def build_caption(brand: str, product_name: str, key_points: str, affiliate_link
         # #ad disclosure (it would be false — nothing here is sponsored).
         hook = f"{brand} spotlight: {product_name}. 🏁"
         cta = "Follow @rgvm8 for more 🔧"
-        disclosure = ""
+        engagement_line = random.choice(ENGAGEMENT_ENGAGEMENT_LINES)
     else:
-        hook = f"New from {brand}: {product_name}. 🔧"
+        # FTC guidance requires the disclosure to be unmissable, not hidden
+        # behind Instagram's "...more" truncation (~125 chars) — so it goes
+        # at the very front, not tacked on before the hashtag block.
+        hook = f"#ad New from {brand}: {product_name}. 🔧"
         cta = "Link in bio 🔗"
-        disclosure = "#ad\n"
+        engagement_line = random.choice(AFFILIATE_ENGAGEMENT_LINES)
+
+    ugc_line = f"\n{UGC_CALLOUT}\n" if random.random() < UGC_CALLOUT_CHANCE else ""
 
     return (
         f"{hook}\n\n"
         f"{points_line}\n\n"
-        f"{cta}\n\n"
-        f"{disclosure}"
+        f"{engagement_line}\n"
+        f"{cta}\n"
+        f"{ugc_line}\n"
         f"{' '.join(hashtags)}"
     )
