@@ -58,6 +58,7 @@ def main() -> int:
     no_auto = set(templates.get("no_auto_reply_categories", []))
     replied_ids = set(load_json(STATE_PATH, []))
     needs_review = load_json(REVIEW_PATH, [])
+    own_username = graph_api.get_account_username(ig_user_id, token).lower()
 
     media_list = graph_api.get_recent_media(ig_user_id, token, limit=20)
     new_replies = 0
@@ -67,6 +68,11 @@ def main() -> int:
         for comment in comments:
             cid = comment["id"]
             if cid in replied_ids:
+                continue
+            if (comment.get("username") or "").lower() == own_username:
+                # Our own past captions/replies show up in the comments feed
+                # too (IG threads them under the media) -- nothing to do here.
+                replied_ids.add(cid)
                 continue
 
             category = classify(comment.get("text", ""))

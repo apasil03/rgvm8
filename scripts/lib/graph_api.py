@@ -72,6 +72,15 @@ def publish_media(ig_user_id: str, container_id: str, token: str) -> str:
     return _check(resp)["id"]
 
 
+def get_account_username(ig_user_id: str, token: str) -> str:
+    resp = requests.get(
+        f"{BASE_URL}/{ig_user_id}",
+        params={"fields": "username", "access_token": token},
+        timeout=30,
+    )
+    return _check(resp).get("username", "")
+
+
 def get_recent_media(ig_user_id: str, token: str, limit: int = 20) -> list:
     resp = requests.get(
         f"{BASE_URL}/{ig_user_id}/media",
