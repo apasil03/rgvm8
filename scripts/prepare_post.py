@@ -51,11 +51,14 @@ def main() -> int:
     due = queue.due_rows(rows, today)
 
     def is_blocked(r: dict) -> bool:
+        post_type = r.get("post_type", "affiliate")
         # engagement rows carry no affiliate link by design; only affiliate
         # rows need a real, confirmed link before they can go out.
-        return r.get("post_type", "affiliate") == "affiliate" and (
-            not r["affiliate_link"] or r["affiliate_link"].startswith("TODO")
-        )
+        if post_type == "affiliate":
+            return not r["affiliate_link"] or r["affiliate_link"].startswith("TODO")
+        if post_type == "recycle":
+            return not r.get("source_media_id")
+        return False
 
     blocked = [r for r in due if is_blocked(r)]
     for r in blocked:
@@ -68,10 +71,14 @@ def main() -> int:
         return 0
 
     row = postable[0]
-    row["image_path"] = resolve_media_filename(row)
-    queue.write_queue(rows)
-
-    print(f"Prepared row {row['id']} ({row['brand']} - {row['product_name']}) with media {row['image_path']}")
+    if row.get("post_type") == "recycle":
+        # Reuses the original post's own media live at publish time (via its
+        # source_media_id) -- nothing to generate or stage here.
+        print(f"Prepared row {row['id']} (recycle of {row['source_media_id']})")
+    else:
+        row["image_path"] = resolve_media_filename(row)
+        queue.write_queue(rows)
+        print(f"Prepared row {row['id']} ({row['brand']} - {row['product_name']}) with media {row['image_path']}")
     set_output("row_id", row["id"])
     return 0
 

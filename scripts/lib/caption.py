@@ -41,6 +41,37 @@ ENGAGEMENT_ENGAGEMENT_LINES = [
 UGC_CALLOUT = "Got a build like this? Tag @rgvm8 to get featured 📸"
 UGC_CALLOUT_CHANCE = 0.25  # occasional, not every post — keeps it from feeling like spam
 
+RECYCLE_HOOKS = [
+    "Throwback to one of our favorites 🔁",
+    "Still one of the best ones we've posted 🔥",
+    "In case you missed this the first time around 👀",
+]
+RECYCLE_ENGAGEMENT_LINES = [
+    "Tag someone who needs to see this 👇",
+    "Still holds up — agree? 👇",
+    "Save this one if you missed it 📌",
+]
+
+
+def build_recycle_caption(original_caption: str) -> str:
+    """'New twist' on our own old content: a throwback hook instead of a
+    verbatim repost, so it doesn't just duplicate the original caption for
+    anyone scrolling back. Our own content, so no rights concern -- this is
+    purely about not looking like an accidental double-post."""
+    first_line = (original_caption or "").strip().split("\n")[0][:150]
+    hook = random.choice(RECYCLE_HOOKS)
+    engagement_line = random.choice(RECYCLE_ENGAGEMENT_LINES)
+    hashtags = pick_hashtags("")
+
+    body = f"{first_line}\n\n" if first_line else ""
+    return (
+        f"{hook}\n\n"
+        f"{body}"
+        f"{engagement_line}\n"
+        f"Follow @rgvm8 for more 🔧\n\n"
+        f"{' '.join(hashtags)}"
+    )
+
 
 def build_caption(brand: str, product_name: str, key_points: str, affiliate_link: str = "", post_type: str = "affiliate") -> str:
     points = [p.strip() for p in key_points.split(";") if p.strip()]

@@ -8,26 +8,31 @@ PENDING_DIR = ROOT / "assets" / "pending"
 
 FIELDNAMES = [
     "id", "scheduled_date", "post_type", "brand", "product_name", "key_points",
-    "image_path", "affiliate_link", "status", "posted_at", "ig_media_id",
+    "image_path", "affiliate_link", "status", "posted_at", "ig_media_id", "source_media_id",
 ]
 
 HEADER_COMMENT = """\
 # Columns:
 #   id             - unique row id, e.g. 001
 #   scheduled_date - YYYY-MM-DD, earliest date this may post (posts in date then id order)
-#   post_type      - "affiliate" (needs a real affiliate_link, gets #ad) or
-#                     "engagement" (general car content, no link needed, no #ad —
-#                     it would be false to disclose an ad on unpaid content)
+#   post_type      - "affiliate" (needs a real affiliate_link, gets #ad), "engagement"
+#                     (general car content, no link needed, no #ad -- it would be
+#                     false to disclose an ad on unpaid content), or "recycle" (our
+#                     own old post, resurfaced with a fresh caption -- needs source_media_id)
 #   brand          - affiliate: RW Carbon, ECS Tuning, RCW Performance, Bimmer Plug,
-#                     ARM Motorsports, AutoTecknic. engagement: any real marque (BMW, Ferrari, McLaren, ...)
-#   product_name   - real product/model name
-#   key_points     - 1-2 short factual points, semicolon-separated. No invented specs.
+#                     ARM Motorsports, AutoTecknic. engagement: any real marque (BMW, Ferrari, McLaren, ...).
+#                     blank for recycle.
+#   product_name   - real product/model name. blank for recycle.
+#   key_points     - 1-2 short factual points, semicolon-separated. No invented specs. blank for recycle.
 #   image_path     - real photo/video filename in assets/pending/, or a TODO
-#                     placeholder to have a Reel auto-generated (real media always wins)
-#   affiliate_link - required (non-TODO) for post_type=affiliate; leave blank for engagement
+#                     placeholder to have a Reel auto-generated (real media always wins).
+#                     unused for recycle -- it reuses the original post's own media.
+#   affiliate_link - required (non-TODO) for post_type=affiliate; leave blank otherwise
 #   status         - pending | posted  (leave as pending when adding a row; the bot flips it)
 #   posted_at      - left blank, filled in automatically
-#   ig_media_id    - left blank, filled in automatically
+#   ig_media_id    - left blank, filled in automatically (the NEW post's id)
+#   source_media_id - required for post_type=recycle: the existing IG media id
+#                     to resurface (from scripts/list_media.py). blank otherwise.
 """
 
 

@@ -1,37 +1,42 @@
 # Columns:
 #   id             - unique row id, e.g. 001
 #   scheduled_date - YYYY-MM-DD, earliest date this may post (posts in date then id order)
-#   post_type      - "affiliate" (needs a real affiliate_link, gets #ad) or
-#                     "engagement" (general car content, no link needed, no #ad —
-#                     it would be false to disclose an ad on unpaid content)
+#   post_type      - "affiliate" (needs a real affiliate_link, gets #ad), "engagement"
+#                     (general car content, no link needed, no #ad -- it would be
+#                     false to disclose an ad on unpaid content), or "recycle" (our
+#                     own old post, resurfaced with a fresh caption -- needs source_media_id)
 #   brand          - affiliate: RW Carbon, ECS Tuning, RCW Performance, Bimmer Plug,
-#                     ARM Motorsports, AutoTecknic. engagement: any real marque (BMW, Ferrari, McLaren, ...)
-#   product_name   - real product/model name
-#   key_points     - 1-2 short factual points, semicolon-separated. No invented specs.
+#                     ARM Motorsports, AutoTecknic. engagement: any real marque (BMW, Ferrari, McLaren, ...).
+#                     blank for recycle.
+#   product_name   - real product/model name. blank for recycle.
+#   key_points     - 1-2 short factual points, semicolon-separated. No invented specs. blank for recycle.
 #   image_path     - real photo/video filename in assets/pending/, or a TODO
-#                     placeholder to have a Reel auto-generated (real media always wins)
-#   affiliate_link - required (non-TODO) for post_type=affiliate; leave blank for engagement
+#                     placeholder to have a Reel auto-generated (real media always wins).
+#                     unused for recycle -- it reuses the original post's own media.
+#   affiliate_link - required (non-TODO) for post_type=affiliate; leave blank otherwise
 #   status         - pending | posted  (leave as pending when adding a row; the bot flips it)
 #   posted_at      - left blank, filled in automatically
-#   ig_media_id    - left blank, filled in automatically
-id,scheduled_date,post_type,brand,product_name,key_points,image_path,affiliate_link,status,posted_at,ig_media_id
-001,2026-09-22,affiliate,RW Carbon,BMW F91/F92/F93 M8 DTM Carbon Fiber Rear Diffuser,Genuine carbon fiber with clear coat finish;100% bolt-on using factory diffuser mounting points;Fits all 2019+ M8 (coupe / gran coupe / convertible),001-reel.mp4,https://bit.ly/4nKn44t,posted,2026-10-01T20:05:58.082421,18093695453422671
-002,2026-09-23,affiliate,ECS Tuning,Billet Aluminum Expansion Tank Cap (ES#3477334 / J018),CNC-machined from solid 6061-T6 billet aluminum with Type II anodized finish;Direct replacement for the factory plastic cap;Fits VW MK7 Golf/GTI/R (2015+),TODO-add-image.jpg,https://bit.ly/48TiJr6,pending,,
-003,2026-09-24,affiliate,Bimmer Plug,VR Style Carbon Fiber Front Lip,Genuine 2x2 weave carbon fiber with gloss UV-protectant clear coat;Fits BMW G80 M3 & G82/G83 M4;Professional installation recommended,TODO-add-image.jpg,TODO-add-your-affiliate-link,pending,,
-004,2026-09-25,affiliate,ARM Motorsports,"7"" Intercooler FMIC (N54/N55)",805 cubic inch bar-and-plate core (20x7x5.75in) with 18 fins per inch;Fits E90/E92 335i and E82 135i (N54/N55),TODO-add-image.jpg,https://bit.ly/42CFyvn,pending,,
-005,2026-09-26,affiliate,AutoTecknic,Dry Carbon Fiber Mirror Covers - BMW G80 M3 / G82/G83 M4,100% pre-preg dry carbon fiber with OEM-spec mounting clips for factory-level fitment;UV-resistant clear coat finish;Lighter than factory ABS plastic covers,TODO-add-image.jpg,https://autotecknic.com/RGVM8,pending,,
-006,2026-09-27,affiliate,RCW Performance,M Style Carbon Fiber Mirror Caps (G Chassis),100% pre-preg dry carbon fiber construction;M Style design;Fits G Chassis BMW models,TODO-add-image.jpg,https://rcwperformance.co.uk/?ref=BATM8BL,pending,,
-007,2026-09-28,engagement,BMW,BMW M8 Competition,4.4L twin-turbo V8 making 617 hp;M xDrive all-wheel drive;0-60 mph in about 2.9 seconds,TODO-add-image.jpg,,pending,,
-008,2026-09-29,engagement,Ferrari,Ferrari F40,First production car to break 200 mph (201 mph);Twin-turbo V8 producing 471 hp;Built 1987-1992 to mark Ferrari's 40th anniversary,TODO-add-image.jpg,,pending,,
-009,2026-09-30,engagement,McLaren,McLaren 720S,4.0L twin-turbo V8 making 710 hp;0-60 mph in about 2.7 seconds;Top speed of 212 mph,TODO-add-image.jpg,,pending,,
-010,2026-10-01,engagement,Porsche,Porsche 911 GT3 RS (992),Naturally aspirated 4.0L flat-6 revving to 9000 rpm;518 hp with no turbos;Extensive aero package built for real downforce at speed,TODO-add-image.jpg,,pending,,
-011,2026-10-02,engagement,Lamborghini,Lamborghini Huracan STO,Naturally aspirated 5.2L V10 making 631 hp;Rear-wheel drive and track-focused setup;STO stands for Super Trofeo Omologata,TODO-add-image.jpg,,pending,,
-012,2026-10-03,engagement,Nissan,Nissan GT-R Nismo (R35),Twin-turbo 3.8L V6 (VR38DETT);ATTESA E-TS all-wheel drive system;Nismo trim rated around 600 hp,TODO-add-image.jpg,,pending,,
-013,2026-10-04,engagement,Audi,Audi RS6 Avant (C8),Twin-turbo 4.0L V8 making 591 hp;Quattro all-wheel drive;0-60 mph in about 3.5 seconds in a wagon body,TODO-add-image.jpg,,pending,,
-014,2026-10-05,engagement,Toyota,Toyota Supra (MK4 / A80),Legendary 2JZ-GTE twin-turbo 3.0L inline-6;Cast-iron block famous for holding huge power on stock internals;Factory rated 320 hp in Japan under the gentleman's agreement cap,TODO-add-image.jpg,,pending,,
-015,2026-10-06,engagement,Bugatti,Bugatti Veyron 16.4,Quad-turbo W16 engine making 1001 hp;First production car to break 250 mph (253 mph);Uses 10 radiators to keep the engine cool,TODO-add-image.jpg,,pending,,
-016,2026-10-07,affiliate,RW Carbon,BMW F91/F92/F93 M8 DTM Carbon Fiber Rear Diffuser,Genuine carbon fiber with clear coat finish;100% bolt-on using factory diffuser mounting points;Fits all 2019+ M8 (coupe / gran coupe / convertible),rwcarbon-m8-diffuser-installed.jpg,https://bit.ly/4nKn44t,pending,,
-017,2026-10-08,engagement,Ferrari,Ferrari California T,3.9L twin-turbo V8 making about 553 hp;First turbocharged V8 in a modern-era Ferrari grand tourer;Retractable hardtop convertible,TODO-add-image.jpg,,pending,,
-018,2026-10-09,engagement,Audi,Audi R8 V10,Naturally aspirated 5.2L V10;Shares its platform and engine architecture with the Lamborghini Huracan;Built alongside the Huracan at Audi's Bollinger Hofe facility,TODO-add-image.jpg,,pending,,
-019,2026-10-10,engagement,Cadillac,Cadillac Escalade-V,Supercharged 6.2L V8 making 682 hp;Cadillac's first V-Series full-size SUV;Adaptive air ride suspension standard,TODO-add-image.jpg,,pending,,
-020,2026-10-11,engagement,McLaren,McLaren 570S,3.8L twin-turbo V8 making 562 hp;Part of McLaren's Sports Series lineup;Dihedral doors carried over from McLaren's halo cars,TODO-add-image.jpg,,pending,,
+#   ig_media_id    - left blank, filled in automatically (the NEW post's id)
+#   source_media_id - required for post_type=recycle: the existing IG media id
+#                     to resurface (from scripts/list_media.py). blank otherwise.
+id,scheduled_date,post_type,brand,product_name,key_points,image_path,affiliate_link,status,posted_at,ig_media_id,source_media_id
+001,2026-09-22,affiliate,RW Carbon,BMW F91/F92/F93 M8 DTM Carbon Fiber Rear Diffuser,Genuine carbon fiber with clear coat finish;100% bolt-on using factory diffuser mounting points;Fits all 2019+ M8 (coupe / gran coupe / convertible),001-reel.mp4,https://bit.ly/4nKn44t,posted,2026-10-01T20:05:58.082421,18093695453422671,
+002,2026-09-23,affiliate,ECS Tuning,Billet Aluminum Expansion Tank Cap (ES#3477334 / J018),CNC-machined from solid 6061-T6 billet aluminum with Type II anodized finish;Direct replacement for the factory plastic cap;Fits VW MK7 Golf/GTI/R (2015+),TODO-add-image.jpg,https://bit.ly/48TiJr6,pending,,,
+003,2026-09-24,affiliate,Bimmer Plug,VR Style Carbon Fiber Front Lip,Genuine 2x2 weave carbon fiber with gloss UV-protectant clear coat;Fits BMW G80 M3 & G82/G83 M4;Professional installation recommended,TODO-add-image.jpg,TODO-add-your-affiliate-link,pending,,,
+004,2026-09-25,affiliate,ARM Motorsports,"7"" Intercooler FMIC (N54/N55)",805 cubic inch bar-and-plate core (20x7x5.75in) with 18 fins per inch;Fits E90/E92 335i and E82 135i (N54/N55),TODO-add-image.jpg,https://bit.ly/42CFyvn,pending,,,
+005,2026-09-26,affiliate,AutoTecknic,Dry Carbon Fiber Mirror Covers - BMW G80 M3 / G82/G83 M4,100% pre-preg dry carbon fiber with OEM-spec mounting clips for factory-level fitment;UV-resistant clear coat finish;Lighter than factory ABS plastic covers,TODO-add-image.jpg,https://autotecknic.com/RGVM8,pending,,,
+006,2026-09-27,affiliate,RCW Performance,M Style Carbon Fiber Mirror Caps (G Chassis),100% pre-preg dry carbon fiber construction;M Style design;Fits G Chassis BMW models,TODO-add-image.jpg,https://rcwperformance.co.uk/?ref=BATM8BL,pending,,,
+007,2026-09-28,engagement,BMW,BMW M8 Competition,4.4L twin-turbo V8 making 617 hp;M xDrive all-wheel drive;0-60 mph in about 2.9 seconds,TODO-add-image.jpg,,pending,,,
+008,2026-09-29,engagement,Ferrari,Ferrari F40,First production car to break 200 mph (201 mph);Twin-turbo V8 producing 471 hp;Built 1987-1992 to mark Ferrari's 40th anniversary,TODO-add-image.jpg,,pending,,,
+009,2026-09-30,engagement,McLaren,McLaren 720S,4.0L twin-turbo V8 making 710 hp;0-60 mph in about 2.7 seconds;Top speed of 212 mph,TODO-add-image.jpg,,pending,,,
+010,2026-10-01,engagement,Porsche,Porsche 911 GT3 RS (992),Naturally aspirated 4.0L flat-6 revving to 9000 rpm;518 hp with no turbos;Extensive aero package built for real downforce at speed,TODO-add-image.jpg,,pending,,,
+011,2026-10-02,engagement,Lamborghini,Lamborghini Huracan STO,Naturally aspirated 5.2L V10 making 631 hp;Rear-wheel drive and track-focused setup;STO stands for Super Trofeo Omologata,TODO-add-image.jpg,,pending,,,
+012,2026-10-03,engagement,Nissan,Nissan GT-R Nismo (R35),Twin-turbo 3.8L V6 (VR38DETT);ATTESA E-TS all-wheel drive system;Nismo trim rated around 600 hp,TODO-add-image.jpg,,pending,,,
+013,2026-10-04,engagement,Audi,Audi RS6 Avant (C8),Twin-turbo 4.0L V8 making 591 hp;Quattro all-wheel drive;0-60 mph in about 3.5 seconds in a wagon body,TODO-add-image.jpg,,pending,,,
+014,2026-10-05,engagement,Toyota,Toyota Supra (MK4 / A80),Legendary 2JZ-GTE twin-turbo 3.0L inline-6;Cast-iron block famous for holding huge power on stock internals;Factory rated 320 hp in Japan under the gentleman's agreement cap,TODO-add-image.jpg,,pending,,,
+015,2026-10-06,engagement,Bugatti,Bugatti Veyron 16.4,Quad-turbo W16 engine making 1001 hp;First production car to break 250 mph (253 mph);Uses 10 radiators to keep the engine cool,TODO-add-image.jpg,,pending,,,
+016,2026-10-07,affiliate,RW Carbon,BMW F91/F92/F93 M8 DTM Carbon Fiber Rear Diffuser,Genuine carbon fiber with clear coat finish;100% bolt-on using factory diffuser mounting points;Fits all 2019+ M8 (coupe / gran coupe / convertible),rwcarbon-m8-diffuser-installed.jpg,https://bit.ly/4nKn44t,pending,,,
+017,2026-10-08,engagement,Ferrari,Ferrari California T,3.9L twin-turbo V8 making about 553 hp;First turbocharged V8 in a modern-era Ferrari grand tourer;Retractable hardtop convertible,TODO-add-image.jpg,,pending,,,
+018,2026-10-09,engagement,Audi,Audi R8 V10,Naturally aspirated 5.2L V10;Shares its platform and engine architecture with the Lamborghini Huracan;Built alongside the Huracan at Audi's Bollinger Hofe facility,TODO-add-image.jpg,,pending,,,
+019,2026-10-10,engagement,Cadillac,Cadillac Escalade-V,Supercharged 6.2L V8 making 682 hp;Cadillac's first V-Series full-size SUV;Adaptive air ride suspension standard,TODO-add-image.jpg,,pending,,,
+020,2026-10-11,engagement,McLaren,McLaren 570S,3.8L twin-turbo V8 making 562 hp;Part of McLaren's Sports Series lineup;Dihedral doors carried over from McLaren's halo cars,TODO-add-image.jpg,,pending,,,

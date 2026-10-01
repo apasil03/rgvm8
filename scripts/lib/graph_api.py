@@ -90,6 +90,33 @@ def get_recent_media(ig_user_id: str, token: str, limit: int = 20) -> list:
     return _check(resp).get("data", [])
 
 
+def get_media_list(ig_user_id: str, token: str, limit: int = 50) -> list:
+    """Like get_recent_media, but with caption/type/engagement fields -- used
+    to pick recycle candidates from the account's older post history."""
+    resp = requests.get(
+        f"{BASE_URL}/{ig_user_id}/media",
+        params={
+            "fields": "id,caption,media_type,media_product_type,timestamp,permalink,like_count,comments_count",
+            "limit": limit,
+            "access_token": token,
+        },
+        timeout=30,
+    )
+    return _check(resp).get("data", [])
+
+
+def get_media_details(media_id: str, token: str) -> dict:
+    resp = requests.get(
+        f"{BASE_URL}/{media_id}",
+        params={
+            "fields": "media_type,media_url,caption,permalink,timestamp",
+            "access_token": token,
+        },
+        timeout=30,
+    )
+    return _check(resp)
+
+
 def get_comments(media_id: str, token: str) -> list:
     resp = requests.get(
         f"{BASE_URL}/{media_id}/comments",

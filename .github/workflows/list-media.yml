@@ -1,0 +1,24 @@
+name: List Instagram post history (manual)
+
+# One-off diagnostic: prints the account's existing posts (caption,
+# engagement, age) to this run's log, so recycle candidates in
+# content/queue.csv can be picked with real context instead of guessing.
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  list:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r scripts/requirements.txt
+      - env:
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          IG_BUSINESS_ID: ${{ secrets.IG_BUSINESS_ID }}
+        run: python scripts/list_media.py

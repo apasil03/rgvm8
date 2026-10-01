@@ -31,18 +31,26 @@ def main() -> int:
         return 1
 
     post_type = row.get("post_type", "affiliate")
-    link = caption_lib.add_utm(row["affiliate_link"], campaign="daily_post") if row["affiliate_link"] else ""
-    media_url = f"{pages_base_url}/assets/pending/{row['image_path']}"
-    is_video = row["image_path"].lower().endswith((".mp4", ".mov"))
-    text = caption_lib.build_caption(
-        brand=row["brand"],
-        product_name=row["product_name"],
-        key_points=row["key_points"],
-        affiliate_link=link,
-        post_type=post_type,
-    )
 
-    print(f"Posting row {row['id']} ({row['brand']} - {row['product_name']}) using {media_url} ({'reel' if is_video else 'image'})")
+    if post_type == "recycle":
+        source = graph_api.get_media_details(row["source_media_id"], token)
+        media_url = source["media_url"]
+        is_video = source.get("media_type") == "VIDEO"
+        text = caption_lib.build_recycle_caption(source.get("caption", ""))
+    else:
+        link = caption_lib.add_utm(row["affiliate_link"], campaign="daily_post") if row["affiliate_link"] else ""
+        media_url = f"{pages_base_url}/assets/pending/{row['image_path']}"
+        is_video = row["image_path"].lower().endswith((".mp4", ".mov"))
+        text = caption_lib.build_caption(
+            brand=row["brand"],
+            product_name=row["product_name"],
+            key_points=row["key_points"],
+            affiliate_link=link,
+            post_type=post_type,
+        )
+
+    label = f"recycle of {row['source_media_id']}" if post_type == "recycle" else f"{row['brand']} - {row['product_name']}"
+    print(f"Posting row {row['id']} ({label}) using {media_url} ({'reel' if is_video else 'image'})")
     if is_video:
         container_id = graph_api.create_reels_container(ig_user_id, media_url, text, token)
         graph_api.wait_until_container_ready(container_id, token, timeout_s=300)
