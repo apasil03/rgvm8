@@ -19,11 +19,18 @@ FPS = 30
 
 
 def _animate_to_reel(bg_image_path: str, output_path: str, overlay_path: str = None) -> None:
-    """Shared zoom+audio treatment: takes any already-9:16 background image
-    (a generated card, or a real photo already fitted to the canvas) and
-    renders the final Reel with a subtle zoom and synthesized audio. An
-    optional static text overlay (brand/product caption bar) is composited
-    on top after the zoom, unscaled, so it stays sharp and in place."""
+    """Shared zoom treatment: takes any already-9:16 background image (a
+    generated card, or a real photo already fitted to the canvas) and
+    renders the final Reel with a subtle zoom. An optional static text
+    overlay (brand/product caption bar) is composited on top after the
+    zoom, unscaled, so it stays sharp and in place.
+
+    Silent on purpose -- synthesized "music" (tried: a two-tone drone, a
+    chord with a slow pulse, a chord with a faster beat + hat texture) was
+    rejected every time, and there's no way to attach real licensed music
+    through the Graph API without the same rights problem as reposting
+    someone else's audio. A silent Reel still gets the format's reach
+    advantage over a static post; most viewers scroll muted anyway."""
     frames = DURATION_S * FPS
     # Subtle, centered "breathing" zoom (1.0 -> 1.08) — enough motion to
     # qualify as a Reel, mild enough that it never crops the frame badly.
@@ -32,51 +39,24 @@ def _animate_to_reel(bg_image_path: str, output_path: str, overlay_path: str = N
         f"zoompan=z='min(zoom+0.0006,1.08)':d={frames}:"
         f"x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':s=1080x1920:fps={FPS}"
     )
-    # Warm synthesized chord + a driving rhythmic pulse and a soft hat
-    # texture, built locally (not a real song -- the Graph API has no way
-    # to attach Meta's in-app licensed music catalog to an API-uploaded
-    # video, and baking in an actual copyrighted track ourselves would be
-    # the same rights problem as reposting someone else's footage). An
-    # A-major triad (root/third/fifth) with tremolo for movement, a
-    # ~120bpm low pulse (apulsator-gated, since this ffmpeg build's volume
-    # filter doesn't support 't' in frame-eval expressions), and a quiet
-    # highpassed-noise hat on the off-beat for texture.
-    fade = min(0.6, DURATION_S / 4)
-    af = (
-        "[1:a]volume=0.14[a1];[2:a]volume=0.10[a2];[3:a]volume=0.11[a3];"
-        "[a1][a2][a3]amix=inputs=3:duration=first:normalize=0[chord];"
-        "[chord]tremolo=f=6:d=0.35[chordmod];"
-        "[4:a]apulsator=mode=sine:hz=2.0:amount=1[kickgate];"
-        "[kickgate]volume=0.38[kick];"
-        "[5:a]highpass=f=6000[hatnoise];"
-        "[hatnoise]apulsator=mode=square:hz=4.0:amount=1[hatgate];"
-        "[hatgate]volume=0.05[hat];"
-        "[chordmod][kick]amix=inputs=2:duration=first:normalize=0[mix1];"
-        "[mix1][hat]amix=inputs=2:duration=first:normalize=0[premaster];"
-        f"[premaster]afade=t=in:st=0:d={fade},afade=t=out:st={DURATION_S - fade}:d={fade}[a]"
-    )
 
     Path(output_path).parent.mkdir(parents=True, exist_ok=True)
     cmd = [
         FFMPEG, "-y",
         "-loop", "1", "-i", bg_image_path,
-        "-f", "lavfi", "-i", f"sine=frequency=110:duration={DURATION_S}",              # A2 (root)
-        "-f", "lavfi", "-i", f"sine=frequency=138.59:duration={DURATION_S}",           # C#3 (third)
-        "-f", "lavfi", "-i", f"sine=frequency=164.81:duration={DURATION_S}",           # E3 (fifth)
-        "-f", "lavfi", "-i", f"sine=frequency=55:duration={DURATION_S}",               # A1 (pulse)
-        "-f", "lavfi", "-i", f"anoisesrc=color=white:duration={DURATION_S}:amplitude=1",  # hat texture
+        "-f", "lavfi", "-i", "anullsrc=channel_layout=mono:sample_rate=44100",
     ]
     if overlay_path:
         cmd += ["-loop", "1", "-i", overlay_path]
-        video_chain = f"[0:v]{vf}[zoomed];[zoomed][6:v]overlay=0:0[v]"
+        video_chain = f"[0:v]{vf}[zoomed];[zoomed][2:v]overlay=0:0[v]"
     else:
         video_chain = f"[0:v]{vf}[v]"
     cmd += [
-        "-filter_complex", f"{video_chain};{af}",
-        "-map", "[v]", "-map", "[a]",
+        "-filter_complex", video_chain,
+        "-map", "[v]", "-map", "1:a",
         "-t", str(DURATION_S),
         "-pix_fmt", "yuv420p",
-        "-c:a", "aac", "-b:a", "96k",
+        "-c:a", "aac", "-b:a", "32k",
         "-movflags", "+faststart",
         output_path,
     ]
