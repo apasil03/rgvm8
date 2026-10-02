@@ -22,13 +22,6 @@ replies to comments on our own posts.
   doesn't match a known pattern is logged to `content/needs_review.json`
   for a human to answer — the bot never guesses whether a part fits
   someone's specific car.
-- **Build Budget tool** (`tools/build-budget/index.html`, live at
-  `https://apasil03.github.io/rgvm8/tools/build-budget/` once Pages
-  deploys): a mobile-friendly planner for followers -- list mods, set
-  labor rate / tax / cash-vs-finance, and see the build total, monthly
-  payment, and an invest-it-instead comparison. Builds are shareable by
-  link. Its "Parts we've featured" list reads `content/queue.csv` live,
-  so it stays in sync with the feed. Put the URL in the Instagram bio.
 - **Image hosting**: the Graph API needs a public URL for each image, so
   `assets/` is published via GitHub Pages (see `docs/SETUP.md`).
 
