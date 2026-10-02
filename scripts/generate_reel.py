@@ -11,17 +11,19 @@ from pathlib import Path
 
 import imageio_ffmpeg
 
-from generate_card import generate_reel_background
+from generate_card import generate_reel_background, generate_caption_overlay
 
 FFMPEG = imageio_ffmpeg.get_ffmpeg_exe()
 DURATION_S = 6
 FPS = 30
 
 
-def _animate_to_reel(bg_image_path: str, output_path: str) -> None:
+def _animate_to_reel(bg_image_path: str, output_path: str, overlay_path: str = None) -> None:
     """Shared zoom+audio treatment: takes any already-9:16 background image
     (a generated card, or a real photo already fitted to the canvas) and
-    renders the final Reel with a subtle zoom and synthesized audio."""
+    renders the final Reel with a subtle zoom and synthesized audio. An
+    optional static text overlay (brand/product caption bar) is composited
+    on top after the zoom, unscaled, so it stays sharp and in place."""
     frames = DURATION_S * FPS
     # Subtle, centered "breathing" zoom (1.0 -> 1.08) — enough motion to
     # qualify as a Reel, mild enough that it never crops the frame badly.
@@ -44,22 +46,27 @@ def _animate_to_reel(bg_image_path: str, output_path: str) -> None:
     )
 
     Path(output_path).parent.mkdir(parents=True, exist_ok=True)
-    subprocess.run(
-        [
-            FFMPEG, "-y",
-            "-loop", "1", "-i", bg_image_path,
-            "-f", "lavfi", "-i", f"sine=frequency=110:duration={DURATION_S}",
-            "-f", "lavfi", "-i", f"sine=frequency=165:duration={DURATION_S}",
-            "-filter_complex", f"[0:v]{vf}[v];{af}",
-            "-map", "[v]", "-map", "[a]",
-            "-t", str(DURATION_S),
-            "-pix_fmt", "yuv420p",
-            "-c:a", "aac", "-b:a", "96k",
-            "-movflags", "+faststart",
-            output_path,
-        ],
-        check=True, capture_output=True,
-    )
+    cmd = [
+        FFMPEG, "-y",
+        "-loop", "1", "-i", bg_image_path,
+        "-f", "lavfi", "-i", f"sine=frequency=110:duration={DURATION_S}",
+        "-f", "lavfi", "-i", f"sine=frequency=165:duration={DURATION_S}",
+    ]
+    if overlay_path:
+        cmd += ["-loop", "1", "-i", overlay_path]
+        video_chain = f"[0:v]{vf}[zoomed];[zoomed][3:v]overlay=0:0[v]"
+    else:
+        video_chain = f"[0:v]{vf}[v]"
+    cmd += [
+        "-filter_complex", f"{video_chain};{af}",
+        "-map", "[v]", "-map", "[a]",
+        "-t", str(DURATION_S),
+        "-pix_fmt", "yuv420p",
+        "-c:a", "aac", "-b:a", "96k",
+        "-movflags", "+faststart",
+        output_path,
+    ]
+    subprocess.run(cmd, check=True, capture_output=True)
 
 
 def generate_reel(brand: str, product_name: str, key_points: str, output_path: str, post_type: str = "affiliate") -> None:
@@ -71,11 +78,18 @@ def generate_reel(brand: str, product_name: str, key_points: str, output_path: s
     Path(tmp_bg).unlink(missing_ok=True)
 
 
-def generate_reel_from_photo(photo_path: str, output_path: str) -> None:
+def generate_reel_from_photo(
+    photo_path: str, output_path: str,
+    brand: str = None, product_name: str = None, post_type: str = "engagement",
+) -> None:
     """Turn a real photo into a music-backed Reel instead of a static post
     -- static image posts can't carry audio at all, and Reels get far more
     reach. Fits the photo into the 9:16 canvas with a blurred fill behind
-    it (rather than cropping) so nothing in the shot gets cut off."""
+    it (rather than cropping) so nothing in the shot gets cut off.
+
+    When brand/product_name are given, a branded caption bar is composited
+    over the bottom of the Reel -- most viewers scroll with sound off, so
+    the photo+music alone doesn't carry the message without on-screen text."""
     tmp_bg = str(Path(output_path).with_suffix(".bg.jpg"))
     subprocess.run(
         [
@@ -91,8 +105,16 @@ def generate_reel_from_photo(photo_path: str, output_path: str) -> None:
         ],
         check=True, capture_output=True,
     )
-    _animate_to_reel(tmp_bg, output_path)
+
+    tmp_overlay = None
+    if brand and product_name:
+        tmp_overlay = str(Path(output_path).with_suffix(".overlay.png"))
+        generate_caption_overlay(brand, product_name, post_type, tmp_overlay)
+
+    _animate_to_reel(tmp_bg, output_path, overlay_path=tmp_overlay)
     Path(tmp_bg).unlink(missing_ok=True)
+    if tmp_overlay:
+        Path(tmp_overlay).unlink(missing_ok=True)
 
 
 if __name__ == "__main__":

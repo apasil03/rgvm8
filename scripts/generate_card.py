@@ -103,6 +103,42 @@ def generate_reel_background(brand: str, product_name: str, key_points: str, out
     img.save(output_path, quality=92)
 
 
+def generate_caption_overlay(brand: str, product_name: str, post_type: str, output_path: str) -> None:
+    """Transparent bottom-bar overlay (brand/product/handle) for a real-photo
+    Reel -- most viewers scroll with sound off, so the photo+music Reels
+    still need on-screen text to actually carry the message. Kept to a
+    bottom bar rather than the full card so it doesn't cover the photo."""
+    img = Image.new("RGBA", (REEL_WIDTH, REEL_HEIGHT), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(img)
+
+    bar_height = 420
+    bar_top = REEL_HEIGHT - bar_height
+    # gradient fade into a solid bar so the cut from photo to text is soft
+    for i in range(120):
+        alpha = int(200 * (i / 120))
+        draw.line([(0, bar_top - 120 + i), (REEL_WIDTH, bar_top - 120 + i)], fill=(10, 10, 12, alpha))
+    draw.rectangle([(0, bar_top), (REEL_WIDTH, REEL_HEIGHT)], fill=(10, 10, 12, 215))
+    draw.rectangle([(0, bar_top), (REEL_WIDTH, bar_top + 8)], fill=(*ACCENT, 255))
+
+    margin = 80
+    brand_font = _font(BOLD, 44)
+    draw.text((margin, bar_top + 40), brand.upper(), font=brand_font, fill=(*ACCENT, 255))
+
+    name_font = _font(BOLD, 56)
+    name_lines = _wrap_to_width(draw, product_name, name_font, REEL_WIDTH - 2 * margin)[:2]
+    y = bar_top + 100
+    for line in name_lines:
+        draw.text((margin, y), line, font=name_font, fill=(*FG, 255))
+        y += 64
+
+    footer_font = _font(REGULAR, 34)
+    footer_cta = "Follow for more" if post_type == "engagement" else "Link in bio // #ad"
+    draw.text((margin, REEL_HEIGHT - 70), f"@RGVM8  //  {footer_cta}", font=footer_font, fill=(*MUTED, 255))
+
+    Path(output_path).parent.mkdir(parents=True, exist_ok=True)
+    img.save(output_path)
+
+
 if __name__ == "__main__":
     generate_card(
         "RW Carbon",

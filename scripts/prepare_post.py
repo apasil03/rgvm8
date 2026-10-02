@@ -31,7 +31,11 @@ def resolve_media_filename(row: dict) -> str:
         reel_name = f"{row['id']}-photo-reel.mp4"
         reel_path = queue.PENDING_DIR / reel_name
         if not reel_path.is_file():
-            generate_reel_from_photo(str(candidate), str(reel_path))
+            generate_reel_from_photo(
+                str(candidate), str(reel_path),
+                brand=row["brand"], product_name=row["product_name"],
+                post_type=row.get("post_type", "affiliate"),
+            )
             print(f"Converted real photo {row['image_path']} into music-backed Reel {reel_name} for row {row['id']}.")
         return reel_name
 
