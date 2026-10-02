@@ -37,8 +37,11 @@ def main() -> int:
         return 1
 
     old_media_id = row["ig_media_id"]
-    print(f"Deleting live media {old_media_id} for row {row_id}")
-    graph_api.delete_media(old_media_id, token)
+    if os.environ.get("SKIP_DELETE") == "true":
+        print(f"Skipping delete of {old_media_id} (SKIP_DELETE=true -- assuming it was removed manually)")
+    else:
+        print(f"Deleting live media {old_media_id} for row {row_id}")
+        graph_api.delete_media(old_media_id, token)
 
     link = caption_lib.add_utm(row["affiliate_link"], campaign="daily_post") if row["affiliate_link"] else ""
     media_url = f"{pages_base_url}/assets/pending/{row['image_path']}"
