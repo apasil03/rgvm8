@@ -30,15 +30,31 @@ def generate_reel(brand: str, product_name: str, key_points: str, output_path: s
         f"zoompan=z='min(zoom+0.0006,1.08)':d={frames}:"
         f"x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':s=1080x1920:fps={FPS}"
     )
+    # Soft two-tone ambient pad, synthesized locally (not a real song --
+    # the Graph API has no way to attach Meta's in-app licensed music
+    # catalog to an API-uploaded video, and baking in an actual
+    # copyrighted track ourselves would be the same rights problem as
+    # reposting someone else's footage). Gives Reels a non-silent audio
+    # bed without any third-party content.
+    fade = min(0.6, DURATION_S / 4)
+    af = (
+        f"[1:a]volume=0.12[a1];[2:a]volume=0.08[a2];"
+        f"[a1][a2]amix=inputs=2:duration=first,"
+        f"afade=t=in:st=0:d={fade},afade=t=out:st={DURATION_S - fade}:d={fade}[a]"
+    )
 
     Path(output_path).parent.mkdir(parents=True, exist_ok=True)
     subprocess.run(
         [
             FFMPEG, "-y",
             "-loop", "1", "-i", tmp_bg,
-            "-vf", vf,
+            "-f", "lavfi", "-i", f"sine=frequency=110:duration={DURATION_S}",
+            "-f", "lavfi", "-i", f"sine=frequency=165:duration={DURATION_S}",
+            "-filter_complex", f"[0:v]{vf}[v];{af}",
+            "-map", "[v]", "-map", "[a]",
             "-t", str(DURATION_S),
             "-pix_fmt", "yuv420p",
+            "-c:a", "aac", "-b:a", "96k",
             "-movflags", "+faststart",
             output_path,
         ],

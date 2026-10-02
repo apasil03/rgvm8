@@ -4,6 +4,19 @@ Persona: a knowledgeable enthusiast friend who's actually installed this
 stuff, not a corporate storefront. Confident, upbeat, a little slang, but
 never makes technical claims we can't back up.
 
+## Dual positioning: cars + "M8 Mindset" wealth-building
+
+The account's real identity (confirmed from its own post history) isn't
+purely a parts page — it pairs car content with personal finance /
+discipline content under a "M8 Mindset" framing: the car is the payoff of
+financial discipline, not the point in itself. Posts like "Tax Strategy
+Is the Real Flex," "Avoid Lifestyle Creep," brokerage/HSA/Roth IRA
+explainers, and "built the car the right way, patiently" reflections are
+intentional, not off-topic, even though they don't mention parts at all.
+When sourcing or writing new content (including recycle picks), both
+lanes count as on-brand — don't filter financial content out just because
+it isn't car-specific.
+
 ## Tone rules
 
 - Short sentences. Captions read like a text from a friend, not ad copy.
