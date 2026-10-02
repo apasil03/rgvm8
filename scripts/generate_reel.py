@@ -32,29 +32,39 @@ def _animate_to_reel(bg_image_path: str, output_path: str, overlay_path: str = N
         f"zoompan=z='min(zoom+0.0006,1.08)':d={frames}:"
         f"x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':s=1080x1920:fps={FPS}"
     )
-    # Soft two-tone ambient pad, synthesized locally (not a real song --
-    # the Graph API has no way to attach Meta's in-app licensed music
-    # catalog to an API-uploaded video, and baking in an actual
-    # copyrighted track ourselves would be the same rights problem as
-    # reposting someone else's footage). Gives Reels a non-silent audio
-    # bed without any third-party content.
+    # Warm synthesized chord + a soft rhythmic pulse, built locally (not a
+    # real song -- the Graph API has no way to attach Meta's in-app
+    # licensed music catalog to an API-uploaded video, and baking in an
+    # actual copyrighted track ourselves would be the same rights problem
+    # as reposting someone else's footage). A plain two-tone drone read as
+    # a dissonant test-tone, so this uses an A-major triad (root/third/
+    # fifth) with gentle tremolo for movement, plus a low pulse gated by a
+    # sine-based envelope (no 't' support in this ffmpeg build's volume
+    # expression eval, hence driving the gate off the raw oscillator
+    # instead) to give it actual rhythm instead of a flat hum.
     fade = min(0.6, DURATION_S / 4)
     af = (
-        f"[1:a]volume=0.12[a1];[2:a]volume=0.08[a2];"
-        f"[a1][a2]amix=inputs=2:duration=first,"
-        f"afade=t=in:st=0:d={fade},afade=t=out:st={DURATION_S - fade}:d={fade}[a]"
+        "[1:a]volume=0.14[a1];[2:a]volume=0.10[a2];[3:a]volume=0.11[a3];"
+        "[a1][a2][a3]amix=inputs=3:duration=first:normalize=0[chord];"
+        "[chord]tremolo=f=4.5:d=0.3[chordmod];"
+        "[4:a]apulsator=mode=sine:hz=1.667:amount=1[kickgate];"
+        "[kickgate]volume=0.30[kick];"
+        "[chordmod][kick]amix=inputs=2:duration=first:normalize=0[premaster];"
+        f"[premaster]afade=t=in:st=0:d={fade},afade=t=out:st={DURATION_S - fade}:d={fade}[a]"
     )
 
     Path(output_path).parent.mkdir(parents=True, exist_ok=True)
     cmd = [
         FFMPEG, "-y",
         "-loop", "1", "-i", bg_image_path,
-        "-f", "lavfi", "-i", f"sine=frequency=110:duration={DURATION_S}",
-        "-f", "lavfi", "-i", f"sine=frequency=165:duration={DURATION_S}",
+        "-f", "lavfi", "-i", f"sine=frequency=110:duration={DURATION_S}",      # A2 (root)
+        "-f", "lavfi", "-i", f"sine=frequency=138.59:duration={DURATION_S}",   # C#3 (third)
+        "-f", "lavfi", "-i", f"sine=frequency=164.81:duration={DURATION_S}",   # E3 (fifth)
+        "-f", "lavfi", "-i", f"sine=frequency=55:duration={DURATION_S}",       # A1 (pulse)
     ]
     if overlay_path:
         cmd += ["-loop", "1", "-i", overlay_path]
-        video_chain = f"[0:v]{vf}[zoomed];[zoomed][3:v]overlay=0:0[v]"
+        video_chain = f"[0:v]{vf}[zoomed];[zoomed][5:v]overlay=0:0[v]"
     else:
         video_chain = f"[0:v]{vf}[v]"
     cmd += [
