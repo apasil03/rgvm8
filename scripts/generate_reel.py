@@ -63,11 +63,11 @@ def _animate_to_reel(bg_image_path: str, output_path: str, overlay_path: str = N
     subprocess.run(cmd, check=True, capture_output=True)
 
 
-def generate_reel(brand: str, product_name: str, key_points: str, output_path: str, post_type: str = "affiliate", cost: dict = None) -> None:
+def generate_reel(brand: str, product_name: str, key_points: str, output_path: str, post_type: str = "affiliate") -> None:
     """Fallback path: no real media supplied, so render a branded text card
-    (a cost-breakdown card for true-cost rows) and animate that instead."""
+    and animate that instead."""
     tmp_bg = str(Path(output_path).with_suffix(".bg.jpg"))
-    generate_reel_background(brand, product_name, key_points, tmp_bg, post_type=post_type, cost=cost)
+    generate_reel_background(brand, product_name, key_points, tmp_bg, post_type=post_type)
     _animate_to_reel(tmp_bg, output_path)
     Path(tmp_bg).unlink(missing_ok=True)
 
@@ -75,7 +75,6 @@ def generate_reel(brand: str, product_name: str, key_points: str, output_path: s
 def generate_reel_from_photo(
     photo_path: str, output_path: str,
     brand: str = None, product_name: str = None, post_type: str = "engagement",
-    subtitle: str = None,
 ) -> None:
     """Turn a real photo into a music-backed Reel instead of a static post
     -- static image posts can't carry audio at all, and Reels get far more
@@ -104,7 +103,7 @@ def generate_reel_from_photo(
     tmp_overlay = None
     if brand and product_name:
         tmp_overlay = str(Path(output_path).with_suffix(".overlay.png"))
-        generate_caption_overlay(brand, product_name, post_type, tmp_overlay, subtitle=subtitle)
+        generate_caption_overlay(brand, product_name, post_type, tmp_overlay)
 
     _animate_to_reel(tmp_bg, output_path, overlay_path=tmp_overlay)
     Path(tmp_bg).unlink(missing_ok=True)

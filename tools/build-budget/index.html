@@ -62,7 +62,7 @@
   .seg button[aria-pressed=true] { background: var(--accent); color: #fff; }
   [hidden] { display: none !important; }
 
-  /* the ledger -- mirrors the true-cost Reel card */
+  /* the ledger */
   .ledger div { display: flex; justify-content: space-between; gap: 12px; padding: 6px 0; font-size: 17px; }
   .ledger span:first-child { color: var(--muted); }
   .ledger b { font: 700 22px var(--display); font-variant-numeric: tabular-nums; }
@@ -138,7 +138,7 @@
   </section>
 
   <section aria-labelledby="res-h" aria-live="polite">
-    <h2 id="res-h">The true cost</h2>
+    <h2 id="res-h">Build total</h2>
     <div class="ledger">
       <div><span>Parts</span><b id="r-parts">$0</b></div>
       <div><span id="r-tax-label">Sales tax</span><b id="r-tax">$0</b></div>
@@ -347,7 +347,7 @@
     catch (e) { toast("Link is in the address bar"); }
   });
 
-  // ---- featured parts: read live from the same queue/true_cost data the
+  // ---- featured parts: read live from the same queue data the
   // Instagram bot posts from, so this list never drifts from the feed.
   function parseCSV(text) {
     const lines = text.split(/\r?\n/).filter((l) => l.trim() && !l.trim().startsWith("#"));
@@ -371,22 +371,15 @@
 
   async function loadFeatured() {
     try {
-      const [qRes, tRes] = await Promise.all([
-        fetch("../../content/queue.csv", { cache: "no-cache" }),
-        fetch("../../content/true_cost.json", { cache: "no-cache" }).catch(() => null),
-      ]);
+      const qRes = await fetch("../../content/queue.csv", { cache: "no-cache" });
       if (!qRes.ok) return;
       const rows = parseCSV(await qRes.text());
-      const tc = tRes && tRes.ok ? await tRes.json() : { rows: {} };
 
       const seen = new Map();
       for (const r of rows) {
         if (r.post_type !== "affiliate" || !/^https?:\/\//.test(r.affiliate_link)) continue;
         const key = `${r.brand}|${r.product_name}`;
-        const cost = (tc.rows || {})[r.id];
-        const priced = cost && cost.part_price != null && cost.install_hours != null && cost.price_checked;
-        const prev = seen.get(key);
-        if (!prev || (priced && !prev.cost)) seen.set(key, { ...r, cost: priced ? cost : null });
+        if (!seen.has(key)) seen.set(key, r);
       }
       if (!seen.size) return;
 
@@ -397,9 +390,7 @@
           <div class="acts"><button type="button">+ Add</button><a target="_blank" rel="sponsored noopener">Shop</a></div>`;
         li.querySelector(".brand").textContent = p.brand;
         li.querySelector(".prod").textContent = p.product_name;
-        li.querySelector(".price").textContent = p.cost
-          ? `${fmt(p.cost.part_price)} · ~${p.cost.install_hours} hr install · price checked ${p.cost.price_checked}`
-          : "Price: check the vendor";
+        li.querySelector(".price").textContent = "Price: check the vendor";
         const link = new URL(p.affiliate_link);
         link.searchParams.set("utm_source", "rgvm8_tools");
         link.searchParams.set("utm_medium", "build_budget");
@@ -408,10 +399,8 @@
           const blank = state.mods.length === 1 && !state.mods[0].name && !state.mods[0].price;
           const mod = {
             name: `${p.brand} ${p.product_name}`,
-            price: p.cost ? String(p.cost.part_price) : "",
-            hours: p.cost ? String(p.cost.install_hours) : "",
-            diy: false,
-            note: p.cost ? `Price checked ${p.cost.price_checked}, so confirm the current price.` : "Enter the current price from the vendor.",
+            price: "", hours: "", diy: false,
+            note: "Enter the current price from the vendor.",
           };
           if (blank) state.mods[0] = mod; else state.mods.push(mod);
           renderMods(); update(); toast("Added to your build");

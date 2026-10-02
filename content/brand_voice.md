@@ -17,19 +17,6 @@ When sourcing or writing new content (including recycle picks), both
 lanes count as on-brand — don't filter financial content out just because
 it isn't car-specific.
 
-### True-cost posts
-
-The place the two lanes meet: a part's real all-in cost (price + install
-labor) next to what the same money would grow to if invested. Rules:
-
-- Every number comes from `content/true_cost.json`, filled in by a human
-  from the vendor's listing. Show the date the price was checked.
-- The investing comparison is labeled hypothetical, with the assumed rate
-  and years stated. Every true-cost post says "not financial advice".
-- The framing is "invest first, mod with what's left", not "don't buy
-  this". It's still an affiliate post, so `#ad` stays up front.
-- Point people to the Build Budget tool in bio to run their own numbers.
-
 ## Tone rules
 
 - Short sentences. Captions read like a text from a friend, not ad copy.

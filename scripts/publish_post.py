@@ -47,7 +47,6 @@ def main() -> int:
             key_points=row["key_points"],
             affiliate_link=link,
             post_type=post_type,
-            row_id=row["id"],
         )
 
     label = f"recycle of {row['source_media_id']}" if post_type == "recycle" else f"{row['brand']} - {row['product_name']}"
