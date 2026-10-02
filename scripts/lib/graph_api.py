@@ -117,6 +117,15 @@ def get_media_details(media_id: str, token: str) -> dict:
     return _check(resp)
 
 
+def delete_media(media_id: str, token: str) -> None:
+    resp = requests.delete(
+        f"{BASE_URL}/{media_id}",
+        params={"access_token": token},
+        timeout=30,
+    )
+    _check(resp)
+
+
 def get_comments(media_id: str, token: str) -> list:
     resp = requests.get(
         f"{BASE_URL}/{media_id}/comments",
