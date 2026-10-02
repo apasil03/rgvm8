@@ -13,16 +13,27 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from lib import queue  # noqa: E402
-from generate_reel import generate_reel  # noqa: E402
+from generate_reel import generate_reel, generate_reel_from_photo  # noqa: E402
+
+PHOTO_EXTENSIONS = (".jpg", ".jpeg", ".png")
 
 
 def resolve_media_filename(row: dict) -> str:
-    """Real media (photo or video) you've added always wins. Otherwise
-    generate a Reel — it gets far more reach than a static card, and we
-    can produce it locally just as easily."""
+    """Real media you've added always wins over a generated card. Every
+    post gets a music-backed Reel either way, though -- a static image
+    can't carry audio on Instagram at all, so a real photo gets turned
+    into a photo-backed Reel instead of posted as a plain static image."""
     candidate = queue.PENDING_DIR / row["image_path"]
     if candidate.is_file():
-        return row["image_path"]
+        if candidate.suffix.lower() not in PHOTO_EXTENSIONS:
+            return row["image_path"]  # already a video -- use as-is
+
+        reel_name = f"{row['id']}-photo-reel.mp4"
+        reel_path = queue.PENDING_DIR / reel_name
+        if not reel_path.is_file():
+            generate_reel_from_photo(str(candidate), str(reel_path))
+            print(f"Converted real photo {row['image_path']} into music-backed Reel {reel_name} for row {row['id']}.")
+        return reel_name
 
     generated_name = f"{row['id']}-reel.mp4"
     generate_reel(
