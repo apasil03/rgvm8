@@ -19,6 +19,9 @@
 #   ig_media_id    - left blank, filled in automatically (the NEW post's id)
 #   source_media_id - required for post_type=recycle: the existing IG media id
 #                     to resurface (from scripts/list_media.py). blank otherwise.
+# A row whose id is also listed in content/true_cost.json posts as a "true cost"
+# breakdown (part + install + invest-it-instead) and waits until its price,
+# install hours, and price_checked date are filled in there.
 id,scheduled_date,post_type,brand,product_name,key_points,image_path,affiliate_link,status,posted_at,ig_media_id,source_media_id
 001,2026-09-22,affiliate,RW Carbon,BMW F91/F92/F93 M8 DTM Carbon Fiber Rear Diffuser,Genuine carbon fiber with clear coat finish;100% bolt-on using factory diffuser mounting points;Fits all 2019+ M8 (coupe / gran coupe / convertible),001-reel.mp4,https://bit.ly/4nKn44t,posted,2026-10-02T15:11:08.358567,17957830593244691,
 002,2026-09-23,affiliate,ECS Tuning,Billet Aluminum Expansion Tank Cap (ES#3477334 / J018),CNC-machined from solid 6061-T6 billet aluminum with Type II anodized finish;Direct replacement for the factory plastic cap;Fits VW MK7 Golf/GTI/R (2015+),TODO-add-image.jpg,https://bit.ly/48TiJr6,pending,,,
@@ -58,3 +61,4 @@ id,scheduled_date,post_type,brand,product_name,key_points,image_path,affiliate_l
 036,2026-10-28,affiliate,Akrapovic,Performance Exhaust System - BMW M8 Competition,Built by Akrapovic -- known for titanium and stainless racing exhaust technology;Engineered to reduce weight versus the factory system;Available through ECS Tuning,TODO-add-image.jpg,https://bit.ly/48TiJr6,pending,,,
 037,2026-10-29,engagement,McLaren,570S to 600LT Widebody Conversion,600LT makes 592 hp versus the 570S's 562 hp;About 220 lbs lighter than the 570S;Wider front track and bigger rear wing built for real downforce,TODO-add-image.jpg,,pending,,,
 038,2026-10-30,engagement,Lamborghini,Aventador to SVJ Widebody Conversion,A widebody kit can copy the SVJ look on a base Aventador;Real SVJ makes about 770 hp versus 730 hp on an Aventador S -- that gap comes from engine work a kit can't add;SVJ's active aero (ALA 2.0) is functional hardware no cosmetic kit replicates,TODO-add-image.jpg,,pending,,,
+039,2026-10-31,affiliate,RW Carbon,BMW F91/F92/F93 M8 DTM Carbon Fiber Rear Diffuser,Genuine carbon fiber with clear coat finish;100% bolt-on using factory diffuser mounting points;Fits all 2019+ M8 (coupe / gran coupe / convertible),rwcarbon-m8-diffuser-installed.jpg,https://bit.ly/4nKn44t,pending,,,

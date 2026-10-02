@@ -33,6 +33,9 @@ HEADER_COMMENT = """\
 #   ig_media_id    - left blank, filled in automatically (the NEW post's id)
 #   source_media_id - required for post_type=recycle: the existing IG media id
 #                     to resurface (from scripts/list_media.py). blank otherwise.
+# A row whose id is also listed in content/true_cost.json posts as a "true cost"
+# breakdown (part + install + invest-it-instead) and waits until its price,
+# install hours, and price_checked date are filled in there.
 """
 
 

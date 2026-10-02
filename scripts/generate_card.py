@@ -90,20 +90,76 @@ def _render(brand: str, product_name: str, key_points: str, post_type: str, widt
     return img
 
 
+def _render_true_cost(brand: str, product_name: str, cost: dict, post_type: str, width: int, height: int) -> Image.Image:
+    """Cost-breakdown variant of the card for true-cost rows: part + labor
+    = all-in, then what the same money would be worth invested. Numbers
+    come straight from lib/true_cost.compute(), never invented here."""
+    img = Image.new("RGB", (width, height), BG)
+    draw = ImageDraw.Draw(img)
+    draw.rectangle([(0, 0), (width, 14)], fill=ACCENT)
+    draw.rectangle([(0, height - 14), (width, height)], fill=ACCENT)
+    margin = 80
+    inner = width - 2 * margin
+    top = (height - HEIGHT) // 2  # centers the block on a 9:16 reel, no-op on the 4:5 card
+
+    draw.text((margin, top + 100), "THE TRUE COST", font=_font(BOLD, 46), fill=ACCENT)
+    name_font = _font(BOLD, 64)
+    y = top + 180
+    for line in _wrap_to_width(draw, f"{brand} {product_name}", name_font, inner)[:3]:
+        draw.text((margin, y), line, font=name_font, fill=FG)
+        y += 72
+
+    # ledger: label left, amount right-aligned
+    y += 50
+    label_font = _font(REGULAR, 46)
+    amount_font = _font(BOLD, 52)
+    labor_label = f"Install ~{cost['install_hours']:g} hr @ ${cost['labor_rate']:,.0f}/hr"
+    for label, amount in (("Part", cost["part_price"]), (labor_label, cost["labor"])):
+        draw.text((margin, y), label, font=label_font, fill=MUTED)
+        text = f"${amount:,.0f}"
+        draw.text((width - margin - draw.textlength(text, font=amount_font), y - 4), text, font=amount_font, fill=FG)
+        y += 78
+    draw.rectangle([(margin, y), (width - margin, y + 4)], fill=MUTED)
+    y += 30
+    total_font = _font(BOLD, 72)
+    draw.text((margin, y), "ALL-IN", font=total_font, fill=FG)
+    text = f"${cost['all_in']:,.0f}"
+    draw.text((width - margin - draw.textlength(text, font=total_font), y), text, font=total_font, fill=ACCENT)
+    y += 140
+
+    # the M8 Mindset comparison
+    pct = f"{cost['annual_return'] * 100:g}%"
+    draw.text((margin, y), f"OR INVEST IT: {pct}/YR x {cost['years']} YRS", font=_font(BOLD, 42), fill=MUTED)
+    y += 60
+    draw.text((margin, y), f"~${cost['invested']:,.0f}", font=_font(BOLD, 110), fill=FG)
+    y += 140
+    draw.text((margin, y), "Mod or market?", font=_font(REGULAR, 46), fill=MUTED)
+
+    footer_cta = "Follow for more" if post_type == "engagement" else "Link in bio  //  #ad"
+    draw.text((margin, height - 210), "@RGVM8", font=_font(BOLD, 44), fill=FG)
+    draw.text((margin, height - 150), footer_cta, font=_font(REGULAR, 34), fill=MUTED)
+    draw.text((margin, height - 100), f"Price checked {cost['price_checked']}. Hypothetical math, not financial advice.", font=_font(REGULAR, 28), fill=MUTED)
+    return img
+
+
 def generate_card(brand: str, product_name: str, key_points: str, output_path: str, post_type: str = "affiliate") -> None:
     img = _render(brand, product_name, key_points, post_type, WIDTH, HEIGHT)
     Path(output_path).parent.mkdir(parents=True, exist_ok=True)
     img.save(output_path, quality=92)
 
 
-def generate_reel_background(brand: str, product_name: str, key_points: str, output_path: str, post_type: str = "affiliate") -> None:
-    """Same design language, rendered at 9:16 for use as a Reel background."""
-    img = _render(brand, product_name, key_points, post_type, REEL_WIDTH, REEL_HEIGHT)
+def generate_reel_background(brand: str, product_name: str, key_points: str, output_path: str, post_type: str = "affiliate", cost: dict = None) -> None:
+    """Same design language, rendered at 9:16 for use as a Reel background.
+    True-cost rows (cost given) get the cost-breakdown layout instead."""
+    if cost is not None:
+        img = _render_true_cost(brand, product_name, cost, post_type, REEL_WIDTH, REEL_HEIGHT)
+    else:
+        img = _render(brand, product_name, key_points, post_type, REEL_WIDTH, REEL_HEIGHT)
     Path(output_path).parent.mkdir(parents=True, exist_ok=True)
     img.save(output_path, quality=92)
 
 
-def generate_caption_overlay(brand: str, product_name: str, post_type: str, output_path: str) -> None:
+def generate_caption_overlay(brand: str, product_name: str, post_type: str, output_path: str, subtitle: str = None) -> None:
     """Transparent bottom-bar overlay (brand/product/handle) for a real-photo
     Reel -- most viewers scroll with sound off, so the photo+music Reels
     still need on-screen text to actually carry the message. Kept to a
@@ -123,6 +179,10 @@ def generate_caption_overlay(brand: str, product_name: str, post_type: str, outp
     margin = 80
     brand_font = _font(BOLD, 44)
     draw.text((margin, bar_top + 40), brand.upper(), font=brand_font, fill=(*ACCENT, 255))
+    if subtitle:
+        # e.g. "ALL-IN ~$1,599" on true-cost rows -- right-aligned on the brand line
+        sub_w = draw.textlength(subtitle, font=brand_font)
+        draw.text((REEL_WIDTH - margin - sub_w, bar_top + 40), subtitle, font=brand_font, fill=(*FG, 255))
 
     name_font = _font(BOLD, 56)
     name_lines = _wrap_to_width(draw, product_name, name_font, REEL_WIDTH - 2 * margin)[:2]

@@ -13,12 +13,13 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from lib import queue  # noqa: E402
+from lib import true_cost as tc  # noqa: E402
 from generate_reel import generate_reel, generate_reel_from_photo  # noqa: E402
 
 PHOTO_EXTENSIONS = (".jpg", ".jpeg", ".png")
 
 
-def resolve_media_filename(row: dict) -> str:
+def resolve_media_filename(row: dict, cost: dict = None) -> str:
     """Real media you've added always wins over a generated card. Every
     post gets a music-backed Reel either way, though -- a static image
     can't carry audio on Instagram at all, so a real photo gets turned
@@ -35,6 +36,7 @@ def resolve_media_filename(row: dict) -> str:
                 str(candidate), str(reel_path),
                 brand=row["brand"], product_name=row["product_name"],
                 post_type=row.get("post_type", "affiliate"),
+                subtitle=f"ALL-IN ~{tc.money(cost['all_in'])}" if cost else None,
             )
             print(f"Converted real photo {row['image_path']} into music-backed Reel {reel_name} for row {row['id']}.")
         return reel_name
@@ -46,6 +48,7 @@ def resolve_media_filename(row: dict) -> str:
         key_points=row["key_points"],
         output_path=str(queue.PENDING_DIR / generated_name),
         post_type=row.get("post_type", "affiliate"),
+        cost=cost,
     )
     print(f"No real media found for row {row['id']} ({row['image_path']}); generated {generated_name} instead.")
     return generated_name
@@ -65,20 +68,26 @@ def main() -> int:
     today = dt.date.today().isoformat()
     due = queue.due_rows(rows, today)
 
-    def is_blocked(r: dict) -> bool:
+    def block_reason(r: dict) -> str:
         post_type = r.get("post_type", "affiliate")
         # engagement rows carry no affiliate link by design; only affiliate
         # rows need a real, confirmed link before they can go out.
-        if post_type == "affiliate":
-            return not r["affiliate_link"] or r["affiliate_link"].startswith("TODO")
-        if post_type == "recycle":
-            return not r.get("source_media_id")
-        return False
+        if post_type == "affiliate" and (not r["affiliate_link"] or r["affiliate_link"].startswith("TODO")):
+            return "affiliate_link is still a TODO placeholder"
+        if post_type == "recycle" and not r.get("source_media_id"):
+            return "source_media_id is blank"
+        # True-cost rows never post with made-up numbers -- wait for a
+        # human to fill in the real price/install time.
+        entry = tc.entry_for(r["id"])
+        if entry is not None and tc.missing_fields(entry):
+            return f"content/true_cost.json is missing {', '.join(tc.missing_fields(entry))}"
+        return ""
 
-    blocked = [r for r in due if is_blocked(r)]
-    for r in blocked:
-        print(f"Skipping row {r['id']} ({r['brand']}): affiliate_link is still a TODO placeholder.")
-    postable = [r for r in due if not is_blocked(r)]
+    for r in due:
+        reason = block_reason(r)
+        if reason:
+            print(f"Skipping row {r['id']} ({r['brand']}): {reason}.")
+    postable = [r for r in due if not block_reason(r)]
 
     if not postable:
         print("No postable rows due today.")
@@ -91,7 +100,7 @@ def main() -> int:
         # source_media_id) -- nothing to generate or stage here.
         print(f"Prepared row {row['id']} (recycle of {row['source_media_id']})")
     else:
-        row["image_path"] = resolve_media_filename(row)
+        row["image_path"] = resolve_media_filename(row, cost=tc.compute(row["id"]))
         queue.write_queue(rows)
         print(f"Prepared row {row['id']} ({row['brand']} - {row['product_name']}) with media {row['image_path']}")
     set_output("row_id", row["id"])

@@ -52,6 +52,7 @@ def main() -> int:
         key_points=row["key_points"],
         affiliate_link=link,
         post_type=row.get("post_type", "affiliate"),
+        row_id=row["id"],
     )
 
     print(f"Publishing replacement for row {row_id} using {media_url}")

@@ -4,6 +4,8 @@ import random
 from pathlib import Path
 from urllib.parse import urlencode, urlparse, parse_qsl, urlunparse
 
+from lib import true_cost as tc
+
 CONTENT_DIR = Path(__file__).resolve().parent.parent.parent / "content"
 
 
@@ -73,7 +75,50 @@ def build_recycle_caption(original_caption: str) -> str:
     )
 
 
-def build_caption(brand: str, product_name: str, key_points: str, affiliate_link: str = "", post_type: str = "affiliate") -> str:
+TRUE_COST_ENGAGEMENT_LINES = [
+    "Worth it, or would you invest it? 👇",
+    "Mod or market? Drop your pick 👇",
+    "Save this before your next build purchase 📌",
+]
+
+
+def build_true_cost_caption(brand: str, product_name: str, key_points: str, cost: dict, post_type: str = "affiliate") -> str:
+    """M8 Mindset post: the real all-in cost of a mod next to what the same
+    money would do invested. Every number comes from true_cost.json (filled
+    in by a human) or its stated assumptions -- the investing line is
+    labeled hypothetical, and nothing here is advice to buy or not buy."""
+    first_point = next((p.strip() for p in key_points.split(";") if p.strip()), "")
+    hashtags = pick_hashtags(brand, general_count=3) + ["#m8mindset", "#financialfreedom"]
+
+    disclosure = "#ad " if post_type == "affiliate" else ""
+    hook = f"{disclosure}The true cost of the {brand} {product_name} 💸"
+    labor_line = f"Install: ~{tc.hours(cost['install_hours'])} (~{tc.money(cost['labor'])} at {tc.money(cost['labor_rate'])}/hr shop rate)"
+    if cost["diy_friendly"]:
+        labor_line += " -- or $0 if you DIY"
+    pct = f"{cost['annual_return'] * 100:g}%"
+    cta = "Link in bio 🔗" if post_type == "affiliate" else "Follow @rgvm8 for more 🔧"
+
+    return (
+        f"{hook}\n\n"
+        f"Part: {tc.money(cost['part_price'])}\n"
+        f"{labor_line}\n"
+        f"All-in: ~{tc.money(cost['all_in'])}\n\n"
+        f"Same {tc.money(cost['all_in'])} invested at {pct}/yr for {cost['years']} years ≈ {tc.money(cost['invested'])}. "
+        f"M8 Mindset: invest first, mod with what's left.\n\n"
+        + (f"{first_point}.\n\n" if first_point else "")
+        + f"{random.choice(TRUE_COST_ENGAGEMENT_LINES)}\n"
+        f"{cta}\n"
+        f"Plan your own build with the budget tool in bio.\n\n"
+        f"Price checked {cost['price_checked']}. Investing math is hypothetical, not financial advice.\n\n"
+        f"{' '.join(hashtags)}"
+    )
+
+
+def build_caption(brand: str, product_name: str, key_points: str, affiliate_link: str = "", post_type: str = "affiliate", row_id: str = "") -> str:
+    cost = tc.compute(row_id) if row_id else None
+    if cost is not None:
+        return build_true_cost_caption(brand, product_name, key_points, cost, post_type)
+
     points = [p.strip() for p in key_points.split(";") if p.strip()]
     points_line = " ".join(f"{p}." if not p.endswith((".", "!")) else p for p in points)
     hashtags = pick_hashtags(brand)

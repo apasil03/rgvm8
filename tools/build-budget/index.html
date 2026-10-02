@@ -1,0 +1,430 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Build Budget — @rgvm8</title>
+<meta name="description" content="Plan your car build's real all-in cost: parts, install labor, financing, and what the same money would be worth invested.">
+<style>
+  @font-face { font-family: "Big Shoulders"; font-weight: 700; src: url("../../assets/fonts/BigShoulders-Bold.ttf") format("truetype"); font-display: swap; }
+  @font-face { font-family: "Big Shoulders"; font-weight: 400; src: url("../../assets/fonts/BigShoulders-Regular.ttf") format("truetype"); font-display: swap; }
+
+  /* same palette as the generated Reels (scripts/generate_card.py) */
+  :root {
+    --bg: #121214; --panel: #1b1b1f; --line: #2c2c32;
+    --fg: #f0f0f0; --muted: #aaaaaf; --accent: #c82828; --good: #3fb37f;
+    --display: "Big Shoulders", "Arial Narrow", sans-serif;
+    --body: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font: 16px/1.45 var(--body); }
+  body::before, body::after { content: ""; position: fixed; left: 0; right: 0; height: 6px; background: var(--accent); z-index: 2; }
+  body::before { top: 0; } body::after { bottom: 0; }
+  main { max-width: 760px; margin: 0 auto; padding: 32px 16px 56px; }
+
+  header .kicker { font: 700 18px var(--display); letter-spacing: .06em; color: var(--accent); text-transform: uppercase; }
+  h1 { font: 700 clamp(40px, 9vw, 64px)/1 var(--display); margin: 4px 0 8px; text-transform: uppercase; }
+  header p { color: var(--muted); margin: 0 0 24px; }
+  h2 { font: 700 24px var(--display); text-transform: uppercase; letter-spacing: .03em; margin: 0 0 12px; }
+
+  section { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 18px 16px; margin-bottom: 16px; }
+
+  label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 4px; }
+  input[type=text], input[type=number], select {
+    width: 100%; background: var(--bg); color: var(--fg); border: 1px solid var(--line);
+    border-radius: 8px; padding: 10px 10px; font: 16px var(--body); min-width: 0;
+  }
+  input:focus, select:focus, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .money { position: relative; }
+  .money input { padding-left: 22px; }
+  .money::before { content: "$"; position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--muted); pointer-events: none; }
+
+  .grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); align-items: end; }
+
+  .mod { display: grid; gap: 8px; grid-template-columns: 1fr 110px 80px auto auto; align-items: end; padding: 10px 0; border-bottom: 1px solid var(--line); }
+  .mod:last-of-type { border-bottom: 0; }
+  .mod .diy { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); padding-bottom: 12px; white-space: nowrap; }
+  .mod .note { grid-column: 1 / -1; font-size: 12px; color: var(--muted); margin-top: -2px; }
+  @media (max-width: 560px) {
+    .mod { grid-template-columns: 1fr 1fr auto auto; }
+    .mod .name { grid-column: 1 / -1; }
+    .mod .diy { padding-bottom: 12px; }
+  }
+
+  button { font: 700 16px var(--display); letter-spacing: .04em; text-transform: uppercase; border-radius: 8px; padding: 10px 14px; cursor: pointer; border: 1px solid var(--line); background: var(--bg); color: var(--fg); }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  button.icon { padding: 10px 12px; color: var(--muted); }
+  .row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+
+  .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; margin-bottom: 12px; }
+  .seg button { border: 0; border-radius: 0; background: transparent; color: var(--muted); }
+  .seg button[aria-pressed=true] { background: var(--accent); color: #fff; }
+  [hidden] { display: none !important; }
+
+  /* the ledger -- mirrors the true-cost Reel card */
+  .ledger div { display: flex; justify-content: space-between; gap: 12px; padding: 6px 0; font-size: 17px; }
+  .ledger span:first-child { color: var(--muted); }
+  .ledger b { font: 700 22px var(--display); font-variant-numeric: tabular-nums; }
+  .ledger .total { border-top: 2px solid var(--muted); margin-top: 6px; padding-top: 12px; }
+  .ledger .total span:first-child { font: 700 30px var(--display); color: var(--fg); text-transform: uppercase; }
+  .ledger .total b { font-size: 40px; color: var(--accent); }
+
+  .versus { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--line); }
+  .versus .label { font: 700 18px var(--display); color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+  .versus .big { font: 700 clamp(48px, 13vw, 80px)/1 var(--display); margin: 4px 0; font-variant-numeric: tabular-nums; }
+  .versus p { color: var(--muted); margin: 6px 0 0; }
+  .stat { font: 700 22px var(--display); color: var(--fg); }
+
+  .featured { list-style: none; margin: 0; padding: 0; }
+  .featured li { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+  .featured li:last-child { border-bottom: 0; }
+  .featured .meta { min-width: 0; }
+  .featured .brand { font: 700 14px var(--display); color: var(--accent); text-transform: uppercase; letter-spacing: .05em; }
+  .featured .prod { overflow-wrap: anywhere; }
+  .featured .price { font-size: 13px; color: var(--muted); }
+  .featured .acts { display: flex; gap: 6px; flex-shrink: 0; }
+  .featured a { color: var(--fg); font: 700 14px var(--display); text-transform: uppercase; text-decoration: none; border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; }
+  .featured button { font-size: 14px; padding: 8px 10px; }
+
+  .fine { font-size: 13px; color: var(--muted); }
+  .toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: var(--fg); color: var(--bg); padding: 8px 14px; border-radius: 8px; font-weight: 600; opacity: 0; transition: opacity .2s; pointer-events: none; z-index: 3; }
+  .toast.show { opacity: 1; }
+  footer { text-align: center; margin-top: 24px; }
+  footer .handle { font: 700 26px var(--display); }
+  footer a { color: var(--fg); }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div class="kicker">@rgvm8 // M8 Mindset</div>
+    <h1>Build Budget</h1>
+    <p>The real all-in cost of your build: parts, install labor, financing, and what that same money could do invested. Mod or market? Run the numbers first.</p>
+  </header>
+
+  <section aria-labelledby="mods-h">
+    <h2 id="mods-h">Your build</h2>
+    <div id="mods"></div>
+    <div class="row">
+      <button type="button" id="add-mod">+ Add mod</button>
+    </div>
+  </section>
+
+
+  <section aria-labelledby="settings-h">
+    <h2 id="settings-h">Assumptions</h2>
+    <div class="grid">
+      <div><label for="labor">Shop labor rate (per hr)</label><div class="money"><input id="labor" type="number" min="0" step="5" inputmode="decimal"></div></div>
+      <div><label for="tax">Sales tax on parts (%)</label><input id="tax" type="number" min="0" max="20" step="0.25" inputmode="decimal"></div>
+    </div>
+
+    <h2 style="margin-top:20px">How you'll pay</h2>
+    <div class="seg" role="group" aria-label="Payment method">
+      <button type="button" data-pay="cash" aria-pressed="true">Cash</button>
+      <button type="button" data-pay="finance" aria-pressed="false">Finance</button>
+    </div>
+    <div class="grid" id="finance-fields" hidden>
+      <div><label for="apr">APR (%)</label><input id="apr" type="number" min="0" max="40" step="0.1" inputmode="decimal"></div>
+      <div><label for="months">Term (months)</label><input id="months" type="number" min="1" max="120" step="1" inputmode="numeric"></div>
+    </div>
+
+    <h2 style="margin-top:20px">Compare: invest it instead</h2>
+    <div class="grid">
+      <div><label for="ret">Assumed annual return (%)</label><input id="ret" type="number" min="0" max="20" step="0.5" inputmode="decimal"></div>
+      <div><label for="years">Years</label><input id="years" type="number" min="1" max="50" step="1" inputmode="numeric"></div>
+      <div><label for="wage">Your take-home pay per hr (optional)</label><div class="money"><input id="wage" type="number" min="0" step="1" inputmode="decimal" placeholder="e.g. 85"></div></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="res-h" aria-live="polite">
+    <h2 id="res-h">The true cost</h2>
+    <div class="ledger">
+      <div><span>Parts</span><b id="r-parts">$0</b></div>
+      <div><span id="r-tax-label">Sales tax</span><b id="r-tax">$0</b></div>
+      <div><span id="r-labor-label">Install labor</span><b id="r-labor">$0</b></div>
+      <div id="r-interest-row" hidden><span id="r-interest-label">Financing interest</span><b id="r-interest">$0</b></div>
+      <div class="total"><span>All-in</span><b id="r-total">$0</b></div>
+    </div>
+    <p class="fine" id="r-monthly" hidden></p>
+
+    <div class="versus">
+      <div class="label" id="v-label">Or invest it</div>
+      <div class="big" id="v-amount">$0</div>
+      <p id="v-detail"></p>
+      <p id="v-hours" hidden></p>
+    </div>
+
+    <div class="row">
+      <button type="button" class="primary" id="share">Copy share link</button>
+      <button type="button" id="reset">Start over</button>
+    </div>
+  </section>
+
+  <section aria-labelledby="feat-h" id="featured-section" hidden>
+    <h2 id="feat-h">Parts we've featured</h2>
+    <p class="fine">#ad: these are affiliate links. @rgvm8 may earn a commission if you buy through them, at no extra cost to you. Always confirm fitment for your exact car with the vendor.</p>
+    <ul class="featured" id="featured"></ul>
+  </section>
+
+  <p class="fine">Educational math only, not financial advice. Investment returns aren't guaranteed and real returns vary year to year; the comparison assumes a steady rate and ignores taxes and inflation. Prices change, so confirm current pricing and fitment with the vendor before you buy.</p>
+
+  <footer>
+    <div class="handle">@RGVM8</div>
+    <a href="https://www.instagram.com/rgvm8/">Follow on Instagram</a>
+  </footer>
+</main>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+(() => {
+  const STORE_KEY = "rgvm8-build-budget";
+  const DEFAULTS = {
+    mods: [{ name: "", price: "", hours: "", diy: false }],
+    labor: 150, tax: 0, pay: "cash", apr: 8.9, months: 36, ret: 7, years: 10, wage: ""
+  };
+  let state;
+
+  const $ = (id) => document.getElementById(id);
+  const num = (v) => { const n = parseFloat(v); return Number.isFinite(n) && n > 0 ? n : 0; };
+  const fmt = (n) => "$" + Math.round(n).toLocaleString("en-US");
+
+  // ---- state: URL hash (shared link) > localStorage (this viewer) > defaults
+  function decodeHash() {
+    try {
+      const m = location.hash.match(/^#b=(.+)$/);
+      if (!m) return null;
+      const json = decodeURIComponent(escape(atob(m[1].replace(/-/g, "+").replace(/_/g, "/"))));
+      return JSON.parse(json);
+    } catch (e) { return null; }
+  }
+  function encodeState() {
+    const b64 = btoa(unescape(encodeURIComponent(JSON.stringify(state))));
+    return b64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  }
+  function load() {
+    const fromHash = decodeHash();
+    if (fromHash) return { ...DEFAULTS, ...fromHash };
+    try {
+      const saved = JSON.parse(localStorage.getItem(STORE_KEY) || "null");
+      if (saved) return { ...DEFAULTS, ...saved };
+    } catch (e) { /* storage blocked -- fall through */ }
+    return structuredClone(DEFAULTS);
+  }
+  function save() {
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) { /* fine without it */ }
+  }
+
+  // ---- mods list
+  function renderMods() {
+    const wrap = $("mods");
+    wrap.innerHTML = "";
+    state.mods.forEach((m, i) => {
+      const row = document.createElement("div");
+      row.className = "mod";
+      row.innerHTML = `
+        <div class="name"><label for="mn${i}">Mod</label><input id="mn${i}" type="text" placeholder="e.g. Carbon rear diffuser" maxlength="80"></div>
+        <div><label for="mp${i}">Part price</label><div class="money"><input id="mp${i}" type="number" min="0" step="1" inputmode="decimal"></div></div>
+        <div><label for="mh${i}">Install hrs</label><input id="mh${i}" type="number" min="0" step="0.5" inputmode="decimal"></div>
+        <label class="diy"><input type="checkbox" id="md${i}"> DIY</label>
+        <button type="button" class="icon" aria-label="Remove this mod">✕</button>
+        ${m.note ? `<div class="note"></div>` : ""}`;
+      const [name, price, hours, diy] = ["mn", "mp", "mh", "md"].map((p) => row.querySelector(`#${p}${i}`));
+      name.value = m.name; price.value = m.price; hours.value = m.hours; diy.checked = !!m.diy;
+      if (m.note) row.querySelector(".note").textContent = m.note;
+      name.addEventListener("input", () => { m.name = name.value; update(); });
+      price.addEventListener("input", () => { m.price = price.value; update(); });
+      hours.addEventListener("input", () => { m.hours = hours.value; update(); });
+      diy.addEventListener("change", () => { m.diy = diy.checked; update(); });
+      row.querySelector("button").addEventListener("click", () => {
+        state.mods.splice(i, 1);
+        if (!state.mods.length) state.mods.push({ name: "", price: "", hours: "", diy: false });
+        renderMods(); update();
+      });
+      wrap.appendChild(row);
+    });
+  }
+
+  // ---- the math
+  function compute() {
+    const parts = state.mods.reduce((s, m) => s + num(m.price), 0);
+    const tax = parts * num(state.tax) / 100;
+    const shopHours = state.mods.reduce((s, m) => s + (m.diy ? 0 : num(m.hours)), 0);
+    const labor = shopHours * num(state.labor);
+    const principal = parts + tax + labor;
+
+    let interest = 0, monthly = 0;
+    const n = Math.max(1, Math.round(num(state.months)) || 1);
+    if (state.pay === "finance" && principal > 0) {
+      const i = num(state.apr) / 100 / 12;
+      monthly = i ? principal * i / (1 - Math.pow(1 + i, -n)) : principal / n;
+      interest = monthly * n - principal;
+    }
+    const total = principal + interest;
+
+    // Opportunity cost: cash = invest the lump sum today; finance = invest
+    // each payment as it would have been made, then let it ride to the horizon.
+    const r = num(state.ret) / 100;
+    const years = Math.max(1, Math.round(num(state.years)) || 1);
+    let invested;
+    let horizon = years;
+    if (state.pay === "finance" && principal > 0) {
+      const rm = Math.pow(1 + r, 1 / 12) - 1;
+      const fvAtEnd = rm ? monthly * (Math.pow(1 + rm, n) - 1) / rm : monthly * n;
+      horizon = Math.max(years, n / 12);
+      invested = fvAtEnd * Math.pow(1 + r, horizon - n / 12);
+    } else {
+      invested = principal * Math.pow(1 + r, years);
+    }
+    return { parts, tax, shopHours, labor, principal, interest, monthly, n, total, invested, horizon, r };
+  }
+
+  function update() {
+    const c = compute();
+    $("r-parts").textContent = fmt(c.parts);
+    $("r-tax").textContent = fmt(c.tax);
+    $("r-tax-label").textContent = `Sales tax (${num(state.tax)}%)`;
+    $("r-labor").textContent = fmt(c.labor);
+    $("r-labor-label").textContent = `Install labor (${c.shopHours} hr @ ${fmt(num(state.labor))}/hr)`;
+    const fin = state.pay === "finance";
+    $("r-interest-row").hidden = !fin;
+    $("r-interest").textContent = fmt(c.interest);
+    $("r-interest-label").textContent = `Interest (${num(state.apr)}% APR, ${c.n} mo)`;
+    $("r-total").textContent = fmt(c.total);
+    $("r-monthly").hidden = !fin || !c.total;
+    $("r-monthly").textContent = `${fmt(c.monthly)}/mo for ${c.n} months.`;
+
+    const pct = (c.r * 100).toLocaleString("en-US", { maximumFractionDigits: 2 });
+    const yrs = Math.round(c.horizon * 10) / 10;
+    $("v-label").textContent = `Or invest it: ${pct}%/yr × ${yrs} yrs`;
+    $("v-amount").textContent = "~" + fmt(c.invested);
+    $("v-detail").textContent = c.total
+      ? (fin
+          ? `Investing those ${fmt(c.monthly)} payments instead of making them, then leaving it alone, could grow to about ${fmt(c.invested)}. The build costs you ${fmt(c.total)}, and ${fmt(c.interest)} of that is interest.`
+          : `Investing the ${fmt(c.total)} today instead could grow to about ${fmt(c.invested)}, which is ${fmt(c.invested - c.total)} in hypothetical growth.`)
+      : "Add a mod with a price to see the comparison.";
+
+    const wage = num(state.wage);
+    $("v-hours").hidden = !(wage && c.total);
+    if (wage && c.total) {
+      const h = c.total / wage;
+      $("v-hours").innerHTML = `That's <span class="stat">${h.toLocaleString("en-US", { maximumFractionDigits: 1 })} hours</span> of your work, or about ${(h / 40).toLocaleString("en-US", { maximumFractionDigits: 1 })} 40-hour weeks.`;
+    }
+    save();
+  }
+
+  // ---- settings wiring
+  const fields = ["labor", "tax", "apr", "months", "ret", "years", "wage"];
+  function syncFields() {
+    fields.forEach((f) => { $(f).value = state[f]; });
+    document.querySelectorAll("[data-pay]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.pay === state.pay)));
+    $("finance-fields").hidden = state.pay !== "finance";
+  }
+  fields.forEach((f) => $(f).addEventListener("input", () => { state[f] = $(f).value; update(); }));
+  document.querySelectorAll("[data-pay]").forEach((b) => b.addEventListener("click", () => {
+    state.pay = b.dataset.pay; syncFields(); update();
+  }));
+
+  $("add-mod").addEventListener("click", () => {
+    state.mods.push({ name: "", price: "", hours: "", diy: false });
+    renderMods(); update();
+    $(`mn${state.mods.length - 1}`).focus();
+  });
+  $("reset").addEventListener("click", () => {
+    state = structuredClone(DEFAULTS);
+    history.replaceState(null, "", location.pathname);
+    syncFields(); renderMods(); update();
+  });
+
+  function toast(msg) {
+    const t = $("toast"); t.textContent = msg; t.classList.add("show");
+    clearTimeout(toast.timer); toast.timer = setTimeout(() => t.classList.remove("show"), 1800);
+  }
+  $("share").addEventListener("click", async () => {
+    const url = `${location.origin}${location.pathname}#b=${encodeState()}`;
+    history.replaceState(null, "", url);
+    try { await navigator.clipboard.writeText(url); toast("Link copied"); }
+    catch (e) { toast("Link is in the address bar"); }
+  });
+
+  // ---- featured parts: read live from the same queue/true_cost data the
+  // Instagram bot posts from, so this list never drifts from the feed.
+  function parseCSV(text) {
+    const lines = text.split(/\r?\n/).filter((l) => l.trim() && !l.trim().startsWith("#"));
+    const rows = [];
+    let field = "", row = [], q = false;
+    const src = lines.join("\n") + "\n";
+    for (let i = 0; i < src.length; i++) {
+      const ch = src[i];
+      if (q) {
+        if (ch === '"' && src[i + 1] === '"') { field += '"'; i++; }
+        else if (ch === '"') q = false;
+        else field += ch;
+      } else if (ch === '"') q = true;
+      else if (ch === ",") { row.push(field); field = ""; }
+      else if (ch === "\n") { row.push(field); rows.push(row); row = []; field = ""; }
+      else field += ch;
+    }
+    const [head, ...body] = rows;
+    return body.map((r) => Object.fromEntries(head.map((h, i) => [h, r[i] ?? ""])));
+  }
+
+  async function loadFeatured() {
+    try {
+      const [qRes, tRes] = await Promise.all([
+        fetch("../../content/queue.csv", { cache: "no-cache" }),
+        fetch("../../content/true_cost.json", { cache: "no-cache" }).catch(() => null),
+      ]);
+      if (!qRes.ok) return;
+      const rows = parseCSV(await qRes.text());
+      const tc = tRes && tRes.ok ? await tRes.json() : { rows: {} };
+
+      const seen = new Map();
+      for (const r of rows) {
+        if (r.post_type !== "affiliate" || !/^https?:\/\//.test(r.affiliate_link)) continue;
+        const key = `${r.brand}|${r.product_name}`;
+        const cost = (tc.rows || {})[r.id];
+        const priced = cost && cost.part_price != null && cost.install_hours != null && cost.price_checked;
+        const prev = seen.get(key);
+        if (!prev || (priced && !prev.cost)) seen.set(key, { ...r, cost: priced ? cost : null });
+      }
+      if (!seen.size) return;
+
+      const list = $("featured");
+      for (const p of seen.values()) {
+        const li = document.createElement("li");
+        li.innerHTML = `<div class="meta"><div class="brand"></div><div class="prod"></div><div class="price"></div></div>
+          <div class="acts"><button type="button">+ Add</button><a target="_blank" rel="sponsored noopener">Shop</a></div>`;
+        li.querySelector(".brand").textContent = p.brand;
+        li.querySelector(".prod").textContent = p.product_name;
+        li.querySelector(".price").textContent = p.cost
+          ? `${fmt(p.cost.part_price)} · ~${p.cost.install_hours} hr install · price checked ${p.cost.price_checked}`
+          : "Price: check the vendor";
+        const link = new URL(p.affiliate_link);
+        link.searchParams.set("utm_source", "rgvm8_tools");
+        link.searchParams.set("utm_medium", "build_budget");
+        li.querySelector("a").href = link.toString();
+        li.querySelector("button").addEventListener("click", () => {
+          const blank = state.mods.length === 1 && !state.mods[0].name && !state.mods[0].price;
+          const mod = {
+            name: `${p.brand} ${p.product_name}`,
+            price: p.cost ? String(p.cost.part_price) : "",
+            hours: p.cost ? String(p.cost.install_hours) : "",
+            diy: false,
+            note: p.cost ? `Price checked ${p.cost.price_checked}, so confirm the current price.` : "Enter the current price from the vendor.",
+          };
+          if (blank) state.mods[0] = mod; else state.mods.push(mod);
+          renderMods(); update(); toast("Added to your build");
+        });
+        list.appendChild(li);
+      }
+      $("featured-section").hidden = false;
+    } catch (e) { /* page works fine without the featured list */ }
+  }
+
+  state = load();
+  syncFields(); renderMods(); update(); loadFeatured();
+})();
+</script>
+</body>
+</html>
