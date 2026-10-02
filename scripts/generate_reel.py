@@ -1,10 +1,10 @@
-"""Render a short Ken-Burns style video from a branded card, for Reels.
+"""Render a short Ken-Burns style video for Reels, either from a generated
+branded card or from a real photo.
 
-100% original, locally rendered from the same real specs already in
-queue.csv — no third-party video or audio, no network needed. Reels get
-far more algorithmic reach than static feed posts, so this is the
-legitimate way to get video content without a camera or someone else's
-footage.
+100% original, locally rendered — no third-party video or audio, no
+network needed. Reels get far more algorithmic reach than static feed
+posts, so this is the legitimate way to get video content without a
+camera, someone else's footage, or licensed music.
 """
 import subprocess
 from pathlib import Path
@@ -18,13 +18,13 @@ DURATION_S = 6
 FPS = 30
 
 
-def generate_reel(brand: str, product_name: str, key_points: str, output_path: str, post_type: str = "affiliate") -> None:
-    tmp_bg = str(Path(output_path).with_suffix(".bg.jpg"))
-    generate_reel_background(brand, product_name, key_points, tmp_bg, post_type=post_type)
-
+def _animate_to_reel(bg_image_path: str, output_path: str) -> None:
+    """Shared zoom+audio treatment: takes any already-9:16 background image
+    (a generated card, or a real photo already fitted to the canvas) and
+    renders the final Reel with a subtle zoom and synthesized audio."""
     frames = DURATION_S * FPS
     # Subtle, centered "breathing" zoom (1.0 -> 1.08) — enough motion to
-    # qualify as a Reel, mild enough that it never crops the text.
+    # qualify as a Reel, mild enough that it never crops the frame badly.
     vf = (
         "scale=2160:3840,"
         f"zoompan=z='min(zoom+0.0006,1.08)':d={frames}:"
@@ -47,7 +47,7 @@ def generate_reel(brand: str, product_name: str, key_points: str, output_path: s
     subprocess.run(
         [
             FFMPEG, "-y",
-            "-loop", "1", "-i", tmp_bg,
+            "-loop", "1", "-i", bg_image_path,
             "-f", "lavfi", "-i", f"sine=frequency=110:duration={DURATION_S}",
             "-f", "lavfi", "-i", f"sine=frequency=165:duration={DURATION_S}",
             "-filter_complex", f"[0:v]{vf}[v];{af}",
@@ -60,6 +60,38 @@ def generate_reel(brand: str, product_name: str, key_points: str, output_path: s
         ],
         check=True, capture_output=True,
     )
+
+
+def generate_reel(brand: str, product_name: str, key_points: str, output_path: str, post_type: str = "affiliate") -> None:
+    """Fallback path: no real media supplied, so render a branded text card
+    and animate that instead."""
+    tmp_bg = str(Path(output_path).with_suffix(".bg.jpg"))
+    generate_reel_background(brand, product_name, key_points, tmp_bg, post_type=post_type)
+    _animate_to_reel(tmp_bg, output_path)
+    Path(tmp_bg).unlink(missing_ok=True)
+
+
+def generate_reel_from_photo(photo_path: str, output_path: str) -> None:
+    """Turn a real photo into a music-backed Reel instead of a static post
+    -- static image posts can't carry audio at all, and Reels get far more
+    reach. Fits the photo into the 9:16 canvas with a blurred fill behind
+    it (rather than cropping) so nothing in the shot gets cut off."""
+    tmp_bg = str(Path(output_path).with_suffix(".bg.jpg"))
+    subprocess.run(
+        [
+            FFMPEG, "-y",
+            "-i", photo_path,
+            "-vf",
+            "split[bg][fg];"
+            "[bg]scale=1080:1920,boxblur=30:5[bgblur];"
+            "[fg]scale=1080:1920:force_original_aspect_ratio=decrease[fgscaled];"
+            "[bgblur][fgscaled]overlay=(W-w)/2:(H-h)/2",
+            "-frames:v", "1",
+            tmp_bg,
+        ],
+        check=True, capture_output=True,
+    )
+    _animate_to_reel(tmp_bg, output_path)
     Path(tmp_bg).unlink(missing_ok=True)
 
 
