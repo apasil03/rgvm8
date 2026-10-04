@@ -77,18 +77,26 @@ MANIFESTO_HASHTAGS = "#M8Mindset #GenerationalWealth #ResponsibleOwnership #Inve
 MANIFESTO_CTA = 'Comment "investing starter guide" and I\'ll send you ours. 📩'
 
 
-def build_manifesto_caption(hook: str, body_points: str) -> str:
+def build_manifesto_caption(hook: str, body_points: str, tag_handles: str = "") -> str:
     """One-off lifestyle/mindset posts (not a product pitch) -- hook and
     body paragraphs come from the queue row; the comment-to-DM CTA and
     hashtags are fixed boilerplate tied to the private-reply automation,
-    not meant to vary per-post."""
+    not meant to vary per-post. tag_handles (semicolon-separated @handles,
+    reusing the otherwise-unused brand column for this post_type) are
+    credited as a separate line -- this is a video post, and the Graph
+    API's tappable photo-tag (user_tags) only works on image posts, so an
+    @mention in the caption is the real mechanism for crediting someone
+    on a Reel."""
     paragraphs = [p.strip() for p in body_points.split(";") if p.strip()]
     body = "\n\n".join(paragraphs)
+    tags = [t.strip() for t in tag_handles.split(";") if t.strip()]
+    tag_section = f"Learn from some of the best voices in personal finance:\n{' '.join(tags)}\n\n" if tags else ""
     return (
         f"{hook}\n\n"
         f"{body}\n\n"
         f"{MANIFESTO_CTA}\n\n"
         f"Follow @rgvm8 for more car + mindset content.\n\n"
+        f"{tag_section}"
         f"{MANIFESTO_HASHTAGS}"
     )
 

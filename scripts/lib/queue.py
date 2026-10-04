@@ -25,7 +25,10 @@ HEADER_COMMENT = """\
 #                     comment-to-DM CTA + hashtags are added automatically)
 #   brand          - affiliate: RW Carbon, ECS Tuning, RCW Performance, Bimmer Plug,
 #                     ARM Motorsports, AutoTecknic. engagement: any real marque (BMW, Ferrari, McLaren, ...).
-#                     blank for recycle/manifesto.
+#                     blank for recycle. manifesto: semicolon-separated @handles to
+#                     credit/mention in the caption (Reels can't carry a real tappable
+#                     photo-tag via the API, only image posts can -- this is the
+#                     actual mechanism for crediting someone on video content).
 #   product_name   - real product/model name. blank for recycle. the hook line for manifesto.
 #   key_points     - 1-2 short factual points, semicolon-separated. No invented specs.
 #                     blank for recycle. body paragraphs (semicolon-separated) for manifesto.
