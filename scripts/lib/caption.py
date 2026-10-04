@@ -73,6 +73,26 @@ def build_recycle_caption(original_caption: str) -> str:
     )
 
 
+MANIFESTO_HASHTAGS = "#M8Mindset #GenerationalWealth #ResponsibleOwnership #InvestConsistently #FamilyFirst"
+MANIFESTO_CTA = 'Comment "investing starter guide" and I\'ll send you ours. 📩'
+
+
+def build_manifesto_caption(hook: str, body_points: str) -> str:
+    """One-off lifestyle/mindset posts (not a product pitch) -- hook and
+    body paragraphs come from the queue row; the comment-to-DM CTA and
+    hashtags are fixed boilerplate tied to the private-reply automation,
+    not meant to vary per-post."""
+    paragraphs = [p.strip() for p in body_points.split(";") if p.strip()]
+    body = "\n\n".join(paragraphs)
+    return (
+        f"{hook}\n\n"
+        f"{body}\n\n"
+        f"{MANIFESTO_CTA}\n\n"
+        f"Follow @rgvm8 for more car + mindset content.\n\n"
+        f"{MANIFESTO_HASHTAGS}"
+    )
+
+
 def build_caption(brand: str, product_name: str, key_points: str, affiliate_link: str = "", post_type: str = "affiliate") -> str:
     points = [p.strip() for p in key_points.split(";") if p.strip()]
     points_line = " ".join(f"{p}." if not p.endswith((".", "!")) else p for p in points)

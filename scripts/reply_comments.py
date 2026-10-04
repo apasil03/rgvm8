@@ -21,11 +21,13 @@ ROOT = Path(__file__).resolve().parent.parent
 STATE_PATH = ROOT / "content" / "replied_state.json"
 REVIEW_PATH = ROOT / "content" / "needs_review.json"
 TEMPLATES_PATH = ROOT / "content" / "reply_templates.json"
+INVESTING_GUIDE_PATH = ROOT / "docs" / "beginners-guide-to-investing.md"
 
 COMPLIMENT_RE = re.compile(r"\b(clean|sick|fire|love|dope|nice|awesome|beautiful|sweet)\b", re.I)
 BUY_RE = re.compile(r"\b(where.*(buy|get|find)|link|price|how much|cost)\b", re.I)
 FITMENT_RE = re.compile(r"\b(fit|fits|fitment|compatible|compatibility|will.*work.*(on|with)|my \w+ \d{2,4})\b", re.I)
 SPAM_RE = re.compile(r"(http|www\.|dm me|check my|follow me|f4f)", re.I)
+GUIDE_RE = re.compile(r"investing\s+starter\s+guide", re.I)
 
 
 def load_json(path: Path, default):
@@ -39,6 +41,8 @@ def save_json(path: Path, data) -> None:
 
 
 def classify(text: str) -> str:
+    if GUIDE_RE.search(text):
+        return "guide_request"
     if SPAM_RE.search(text):
         return "spam"
     if FITMENT_RE.search(text):
@@ -89,6 +93,11 @@ def main() -> int:
                         "category": category,
                     })
                 continue
+
+            if category == "guide_request":
+                guide_text = INVESTING_GUIDE_PATH.read_text()
+                graph_api.send_private_reply(cid, guide_text, token)
+                print(f"Sent investing guide via private reply to {cid}")
 
             options = templates.get(category, [])
             if not options:

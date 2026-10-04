@@ -142,3 +142,15 @@ def reply_to_comment(comment_id: str, message: str, token: str) -> str:
         timeout=30,
     )
     return _check(resp)["id"]
+
+
+def send_private_reply(comment_id: str, message: str, token: str) -> str:
+    """DMs the commenter privately in response to their public comment.
+    Only valid within Instagram's window after the comment is posted, and
+    only once per comment -- see Meta's private replies docs."""
+    resp = requests.post(
+        f"{BASE_URL}/{comment_id}/private_replies",
+        data={"message": message, "access_token": token},
+        timeout=30,
+    )
+    return _check(resp)["id"]

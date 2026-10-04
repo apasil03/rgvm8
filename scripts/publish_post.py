@@ -37,6 +37,13 @@ def main() -> int:
         media_url = source["media_url"]
         is_video = source.get("media_type") == "VIDEO"
         text = caption_lib.build_recycle_caption(source.get("caption", ""))
+    elif post_type == "manifesto":
+        media_url = f"{pages_base_url}/assets/pending/{row['image_path']}"
+        is_video = row["image_path"].lower().endswith((".mp4", ".mov"))
+        text = caption_lib.build_manifesto_caption(
+            hook=row["product_name"],
+            body_points=row["key_points"],
+        )
     else:
         link = caption_lib.add_utm(row["affiliate_link"], campaign="daily_post") if row["affiliate_link"] else ""
         media_url = f"{pages_base_url}/assets/pending/{row['image_path']}"

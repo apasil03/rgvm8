@@ -9,6 +9,11 @@
     "It's up on our bio link 👆",
     "Grab it from the link in our bio!"
   ],
+  "guide_request": [
+    "Sent it your way! 📩 check your DMs",
+    "Just sent it over 📩 check your requests/DMs",
+    "Dropped it in your DMs! 📩"
+  ],
   "_comment": "Categories below are intentionally NOT auto-replied — logged to needs_review.json instead so a human answers. Never guess fitment/compatibility.",
   "no_auto_reply_categories": ["fitment", "spam", "unclear"]
 }
