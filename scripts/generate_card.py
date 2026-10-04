@@ -6,6 +6,7 @@ photos (when you add them to assets/pending/) always win; this is the
 fallback, not the goal. Engagement will generally be lower than real
 product/install photos, so swap these out when you can.
 """
+import random
 import textwrap
 from pathlib import Path
 
@@ -137,6 +138,59 @@ def generate_caption_overlay(brand: str, product_name: str, post_type: str, outp
 
     Path(output_path).parent.mkdir(parents=True, exist_ok=True)
     img.save(output_path)
+
+
+def generate_stock_chart_image(output_path: str, seed: int = None) -> None:
+    """Abstract, generic market-chart graphic -- not a real index, ticker,
+    or lifted stock photo, so there's no rights issue and no implication
+    this represents any specific real security's actual performance.
+    Candlesticks + a trend line on a grid, in the brand's color palette."""
+    rng = random.Random(seed)
+    img = Image.new("RGB", (REEL_WIDTH, REEL_HEIGHT), BG)
+    draw = ImageDraw.Draw(img)
+
+    chart_top, chart_bottom = 500, 1500
+    chart_left, chart_right = 60, REEL_WIDTH - 60
+    grid_color = (40, 40, 44)
+    for i in range(1, 6):
+        y = chart_top + (chart_bottom - chart_top) * i // 6
+        draw.line([(chart_left, y), (chart_right, y)], fill=grid_color, width=2)
+
+    n = 28
+    xs = [chart_left + (chart_right - chart_left) * i // (n - 1) for i in range(n)]
+    value = 0.35
+    values = []
+    for _ in range(n):
+        value += rng.uniform(-0.05, 0.085)  # gentle upward drift overall
+        value = max(0.05, min(0.95, value))
+        values.append(value)
+
+    candle_w = max(6, (chart_right - chart_left) // (n * 2))
+    for i, x in enumerate(xs):
+        v = values[i]
+        prev = values[i - 1] if i > 0 else v
+        y_open = chart_bottom - int((chart_bottom - chart_top) * prev)
+        y_close = chart_bottom - int((chart_bottom - chart_top) * v)
+        up = y_close <= y_open
+        color = (60, 170, 100) if up else ACCENT
+        top, bottom = min(y_open, y_close), max(y_open, y_close)
+        wick = max(3, candle_w // 3)
+        draw.line([(x, top - 18), (x, bottom + 18)], fill=color, width=wick)
+        draw.rectangle([(x - candle_w, top), (x + candle_w, max(bottom, top + 6))], fill=color)
+
+    trend_points = [
+        (xs[i], chart_bottom - int((chart_bottom - chart_top) * values[i]))
+        for i in range(n)
+    ]
+    draw.line(trend_points, fill=FG, width=5, joint="curve")
+
+    margin = 80
+    draw.rectangle([(0, 0), (REEL_WIDTH, 14)], fill=ACCENT)
+    label_font = _font(BOLD, 46)
+    draw.text((margin, 100), "RGVM8 LIFESTYLE", font=label_font, fill=ACCENT)
+
+    Path(output_path).parent.mkdir(parents=True, exist_ok=True)
+    img.save(output_path, quality=92)
 
 
 if __name__ == "__main__":
