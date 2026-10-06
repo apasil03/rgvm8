@@ -45,6 +45,15 @@ def main() -> int:
             body_points=row["key_points"],
             tag_handles=row["brand"],  # repurposed for manifesto: semicolon-separated @handles to credit
         )
+    elif post_type == "roundup":
+        media_url = f"{pages_base_url}/assets/pending/{row['image_path']}"
+        is_video = row["image_path"].lower().endswith((".mp4", ".mov"))
+        brand_tags = [t.strip() for t in row["brand"].split(";") if t.strip()]
+        text = caption_lib.build_roundup_caption(
+            hook=row["product_name"],
+            body_points=row["key_points"],
+            brand_tags=brand_tags,
+        )
     else:
         link = caption_lib.add_utm(row["affiliate_link"], campaign="daily_post") if row["affiliate_link"] else ""
         media_url = f"{pages_base_url}/assets/pending/{row['image_path']}"

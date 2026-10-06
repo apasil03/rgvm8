@@ -19,10 +19,14 @@ HEADER_COMMENT = """\
 #                     (general car content, no link needed, no #ad -- it would be
 #                     false to disclose an ad on unpaid content), "recycle" (our
 #                     own old post, resurfaced with a fresh caption -- needs
-#                     source_media_id), or "manifesto" (one-off lifestyle/mindset
+#                     source_media_id), "manifesto" (one-off lifestyle/mindset
 #                     post, not a product pitch -- product_name is the hook line,
 #                     key_points are semicolon-separated body paragraphs, a fixed
-#                     comment-to-DM CTA + hashtags are added automatically)
+#                     comment-to-DM CTA + hashtags are added automatically), or
+#                     "roundup" (multi-brand "link in bio" post -- product_name is
+#                     the hook line, key_points are semicolon-separated body
+#                     paragraphs, gets #ad since the bio link is a real commission
+#                     link; brand = semicolon-separated hashtags, not a single brand)
 #   brand          - affiliate: RW Carbon, ECS Tuning, RCW Performance, Bimmer Plug,
 #                     ARM Motorsports, AutoTecknic. engagement: any real marque (BMW, Ferrari, McLaren, ...).
 #                     blank for recycle. manifesto: semicolon-separated @handles to

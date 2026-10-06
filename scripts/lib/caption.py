@@ -101,6 +101,24 @@ def build_manifesto_caption(hook: str, body_points: str, tag_handles: str = "") 
     )
 
 
+def build_roundup_caption(hook: str, body_points: str, brand_tags: list) -> str:
+    """Multi-brand 'link in bio' post -- doesn't fit the single
+    affiliate_link/brand schema build_caption() assumes, since it points
+    to several real commission links at once via the bio link. Still
+    needs #ad up front: the bio link it's driving clicks to is a real
+    commission link, same disclosure obligation as a single-brand post."""
+    paragraphs = [p.strip() for p in body_points.split(";") if p.strip()]
+    body = "\n\n".join(paragraphs)
+    general = pick_hashtags("", general_count=4, brand_count=0)
+    hashtags = general + brand_tags
+    return (
+        f"#ad {hook}\n\n"
+        f"{body}\n\n"
+        f"Link in bio 🔗\n\n"
+        f"{' '.join(hashtags)}"
+    )
+
+
 def build_caption(brand: str, product_name: str, key_points: str, affiliate_link: str = "", post_type: str = "affiliate") -> str:
     points = [p.strip() for p in key_points.split(";") if p.strip()]
     points_line = " ".join(f"{p}." if not p.endswith((".", "!")) else p for p in points)
