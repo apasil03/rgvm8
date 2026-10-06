@@ -32,6 +32,15 @@ def main() -> int:
 
     post_type = row.get("post_type", "affiliate")
 
+    if post_type != "recycle" and row["image_path"].startswith("TODO"):
+        print(
+            f"Row {row_id} still has a TODO image_path placeholder ({row['image_path']}) -- "
+            "generate the real media and update image_path before publishing. "
+            "(This is the failure mode when a row was staged manually instead of "
+            "through prepare_post.py, which fills this in automatically.)"
+        )
+        return 1
+
     if post_type == "recycle":
         source = graph_api.get_media_details(row["source_media_id"], token)
         media_url = source["media_url"]
