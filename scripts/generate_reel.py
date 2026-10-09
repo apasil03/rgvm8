@@ -35,9 +35,9 @@ def _animate_to_reel(bg_image_path: str, output_path: str, overlay_path: str = N
     # Subtle, centered "breathing" zoom (1.0 -> 1.08) — enough motion to
     # qualify as a Reel, mild enough that it never crops the frame badly.
     vf = (
-        "scale=2160:3840,"
+        "scale=2160:3840,setsar=1,"
         f"zoompan=z='min(zoom+0.0006,1.08)':d={frames}:"
-        f"x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':s=1080x1920:fps={FPS}"
+        f"x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':s=1080x1920:fps={FPS},setsar=1"
     )
 
     Path(output_path).parent.mkdir(parents=True, exist_ok=True)
@@ -91,9 +91,9 @@ def generate_reel_from_photo(
             "-i", photo_path,
             "-vf",
             "split[bg][fg];"
-            "[bg]scale=1080:1920,boxblur=30:5[bgblur];"
-            "[fg]scale=1080:1920:force_original_aspect_ratio=decrease[fgscaled];"
-            "[bgblur][fgscaled]overlay=(W-w)/2:(H-h)/2",
+            "[bg]scale=1080:1920,setsar=1,boxblur=30:5[bgblur];"
+            "[fg]scale=1080:1920:force_original_aspect_ratio=decrease,setsar=1[fgscaled];"
+            "[bgblur][fgscaled]overlay=(W-w)/2:(H-h)/2,setsar=1",
             "-frames:v", "1",
             tmp_bg,
         ],
