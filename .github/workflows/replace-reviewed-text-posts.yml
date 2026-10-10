@@ -1,0 +1,76 @@
+name: Replace reviewed text-only posts (manual)
+
+# One-off October 10 cleanup. The original posts are removed in Instagram
+# before dispatch. Expected media IDs make successful rows skip on a rerun.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r scripts/requirements.txt
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: "."
+      - id: deployment
+        uses: actions/deploy-pages@v4
+      - name: Publish reviewed replacements
+        env:
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          IG_BUSINESS_ID: ${{ secrets.IG_BUSINESS_ID }}
+          PAGES_BASE_URL: ${{ vars.PAGES_BASE_URL }}
+        run: |
+          python - <<'PY'
+          import os
+          import sys
+          sys.path.insert(0, "scripts")
+          from lib import queue
+          import publish_post
+
+          expected = {
+              "002": "18394718704201807",
+              "004": "17993740064844270",
+              "005": "18077647949411452",
+              "006": "17933876178403654",
+              "040": "18380310733224700",
+              "041": "18381299422237420",
+              "042": "18036410753845522",
+          }
+          for row_id, old_id in expected.items():
+              row = next(r for r in queue.read_queue() if r["id"] == row_id)
+              if row["ig_media_id"] != old_id:
+                  print(f"Skipping {row_id}: publication record already changed", flush=True)
+                  continue
+              if row["image_path"] != f"{row_id}-ai-reel.mp4" or "AI-generated" not in row["key_points"]:
+                  raise RuntimeError(f"Unreviewed media or missing disclosure for {row_id}")
+              os.environ["ROW_ID"] = row_id
+              if publish_post.main() != 0:
+                  raise RuntimeError(f"Publishing failed for {row_id}")
+          PY
+      - name: Save publication records even if a later row fails
+        if: always()
+        run: |
+          git config user.name "rgvm8-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add content/queue.csv
+          git diff --cached --quiet || git commit -m "Record reviewed image replacements [skip ci]"
+          git pull --rebase
+          git push
