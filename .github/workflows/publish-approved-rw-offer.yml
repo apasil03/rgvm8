@@ -1,0 +1,83 @@
+name: Publish approved RW Carbon offer (manual)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r scripts/requirements.txt
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: "."
+      - id: deployment
+        uses: actions/deploy-pages@v4
+      - name: Publish approved Reel and exact caption
+        env:
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          IG_BUSINESS_ID: ${{ secrets.IG_BUSINESS_ID }}
+          PAGES_BASE_URL: ${{ vars.PAGES_BASE_URL }}
+        run: |
+          python -u - <<'PY'
+          import datetime as dt
+          import os
+          import sys
+          sys.path.insert(0, "scripts")
+          from lib import graph_api, queue
+
+          rows = queue.read_queue()
+          row = next(r for r in rows if r["id"] == "045")
+          if row["status"] == "posted" or row["ig_media_id"]:
+              print("Already published; refusing to duplicate the approved Reel.")
+              sys.exit(0)
+          assert row["status"] == "draft"
+          assert row["image_path"] == "045-rw-save5now-reel.mp4"
+          assert row["affiliate_link"] == "https://bit.ly/4nKn44t"
+          caption = '''#ad Your next build upgrade 👀🔥
+
+          RW Carbon’s email offer: save 5% with code SAVE5NOW.
+
+          Tap “RW Carbon 💵 off” in my bio—the existing bit.ly/4nKn44t link—and enter the code at checkout. Confirm eligibility before ordering.
+
+          What’s next for your build? 👇
+
+          #RGVM8 #RWCarbon #BMW #BMWM5 #CarbonFiber #CarMods #BuildNotBought #CarEnthusiast'''
+          token = os.environ["IG_ACCESS_TOKEN"]
+          user_id = os.environ["IG_BUSINESS_ID"]
+          media_url = os.environ["PAGES_BASE_URL"].rstrip("/") + "/assets/pending/" + row["image_path"]
+          container_id = graph_api.create_reels_container(user_id, media_url, caption, token)
+          graph_api.wait_until_container_ready(container_id, token, timeout_s=300)
+          media_id = graph_api.publish_media(user_id, container_id, token)
+          print(f"Published approved RW Carbon Reel as media {media_id}", flush=True)
+          row["status"] = "posted"
+          row["posted_at"] = dt.datetime.now(dt.timezone.utc).isoformat()
+          row["ig_media_id"] = media_id
+          queue.write_queue(rows)
+          PY
+      - name: Save publication record
+        if: always()
+        run: |
+          git config user.name "rgvm8-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add content/queue.csv
+          git diff --cached --quiet || git commit -m "Record approved RW Carbon Reel [skip ci]"
+          git pull --rebase
+          git push
