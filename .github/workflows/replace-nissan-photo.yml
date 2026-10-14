@@ -1,0 +1,118 @@
+name: Replace approved Nissan photo
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: Stage photo, or publish verified replacement before original removal
+        type: choice
+        options: [stage, publish]
+        default: stage
+        required: true
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: false
+jobs:
+  replace:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r scripts/requirements.txt
+      - uses: actions/configure-pages@v5
+        if: inputs.action == 'stage'
+      - uses: actions/upload-pages-artifact@v3
+        if: inputs.action == 'stage'
+        with:
+          path: '.'
+      - uses: actions/deploy-pages@v4
+        if: inputs.action == 'stage'
+      - name: Stage or publish exactly one approved photo
+        env:
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          IG_BUSINESS_ID: ${{ secrets.IG_BUSINESS_ID }}
+          PAGES_BASE_URL: ${{ vars.PAGES_BASE_URL }}
+          REPLACEMENT_ACTION: ${{ inputs.action }}
+        run: |
+          python -u - <<'PY'
+          """Stage/publish the explicitly requested row 012 photo replacement once."""
+          import datetime as dt
+          import json
+          import os
+          from pathlib import Path
+          
+          import sys
+          sys.path.insert(0, "scripts")
+          from lib import graph_api, queue
+          
+          OLD = "18146960662577221"
+          ASSET = "012-nissan-photo.jpg"
+          RECORD = Path("content/012-nissan-replacement.json")
+          token = os.environ["IG_ACCESS_TOKEN"]
+          account = os.environ["IG_BUSINESS_ID"]
+          assert graph_api.get_account_username(account, token) == "rgvm8"
+          rows = queue.read_queue()
+          row = next(r for r in rows if r["id"] == "012")
+          record = json.loads(RECORD.read_text()) if RECORD.exists() else {}
+          
+          def save():
+              RECORD.write_text(json.dumps(record, indent=2, ensure_ascii=False) + "\n")
+          
+          if record.get("new_media_id") or row["ig_media_id"] != OLD:
+              print("Replacement already recorded; no publication.")
+              raise SystemExit(0)
+          
+          if os.environ["REPLACEMENT_ACTION"] == "stage":
+              if record.get("container_id"):
+                  print("Already staged", record["container_id"])
+                  raise SystemExit(0)
+              original = graph_api.get_media_details(OLD, token)
+              caption = original["caption"]
+              assert caption.startswith("Nissan spotlight: Nissan GT-R Nismo (R35).")
+              url = os.environ["PAGES_BASE_URL"].rstrip("/") + "/assets/pending/" + ASSET
+              container = graph_api.create_media_container(account, url, caption, token)
+              graph_api.wait_until_container_ready(container, token)
+              record.update(old_media_id=OLD, old_permalink=original["permalink"], caption=caption,
+                            image_path=ASSET, container_id=container, status="ready")
+              save()
+              print("Replacement photo verified and ready", container)
+          else:
+              assert record.get("status") == "ready", "Not staged or previous attempt needs live verification"
+              recent = graph_api.get_media_list(account, token, limit=50)
+              matches = [p for p in recent if p.get("caption") == record["caption"] and p["id"] != OLD]
+              if matches:
+                  assert len(matches) == 1
+                  media_id = matches[0]["id"]
+                  print("Existing matching replacement found; recording without republishing")
+              else:
+                  record["status"] = "publication_attempted"
+                  save()
+                  media_id = graph_api.publish_media(account, record["container_id"], token)
+              record.update(new_media_id=media_id, status="published", posted_at=dt.datetime.now(dt.timezone.utc).isoformat())
+              save()
+              row.update(image_path=ASSET, ig_media_id=media_id, posted_at=record["posted_at"], status="posted")
+              queue.write_queue(rows)
+              details = graph_api.get_media_details(media_id, token)
+              record["new_permalink"] = details["permalink"]
+              save()
+              print("Verified replacement", media_id, details["permalink"])
+          
+          PY
+      - name: Save replacement state
+        if: always()
+        run: |
+          git config user.name rgvm8-bot
+          git config user.email actions@users.noreply.github.com
+          git add content/queue.csv
+          if test -f content/012-nissan-replacement.json; then git add content/012-nissan-replacement.json; fi
+          git diff --cached --quiet || git commit -m 'Record approved Nissan photo replacement [skip ci]'
+          git pull --rebase origin claude/instagram-social-media-mgmt-ph4myw
+          git push origin HEAD:claude/instagram-social-media-mgmt-ph4myw
+
